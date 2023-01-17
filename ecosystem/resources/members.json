@@ -18,7 +18,7 @@
             "styles_results": [],
             "coverages_results": [],
             "skip_tests": true,
-            "stars": 316
+            "stars": 325
         },
         "4": {
             "alternatives": null,
@@ -39,7 +39,7 @@
             "styles_results": [],
             "coverages_results": [],
             "skip_tests": true,
-            "stars": 135
+            "stars": 138
         },
         "6": {
             "alternatives": null,
@@ -60,7 +60,7 @@
             "styles_results": [],
             "coverages_results": [],
             "skip_tests": true,
-            "stars": 350
+            "stars": 365
         },
         "7": {
             "alternatives": null,
@@ -82,7 +82,7 @@
             "styles_results": [],
             "coverages_results": [],
             "skip_tests": true,
-            "stars": 178
+            "stars": 186
         },
         "8": {
             "alternatives": null,
@@ -103,7 +103,7 @@
             "styles_results": [],
             "coverages_results": [],
             "skip_tests": true,
-            "stars": 132
+            "stars": 136
         },
         "10": {
             "alternatives": null,
@@ -137,7 +137,7 @@
             "url": "https://github.com/Qiskit/qiskit-dynamics",
             "tests_results": [],
             "skip_tests": true,
-            "stars": 51
+            "stars": 52
         },
         "12": {
             "name": "OpenQASM",
@@ -159,7 +159,7 @@
             "configuration": null,
             "skip_tests": true,
             "historical_test_results": [],
-            "stars": 905
+            "stars": 930
         }
     },
     "Community": {
@@ -208,7 +208,7 @@
                 ]
             },
             "historical_test_results": [],
-            "stars": 120
+            "stars": 123
         },
         "3": {
             "name": "c3",
@@ -667,7 +667,7 @@
                     "package_commit_hash": "fa4967ee127eebac981eb04f875e7a1706e0574b"
                 }
             ],
-            "stars": 14
+            "stars": 16
         },
         "5": {
             "name": "qtcodes",
@@ -943,7 +943,7 @@
                     "package_commit_hash": "fa4967ee127eebac981eb04f875e7a1706e0574b"
                 }
             ],
-            "stars": 72
+            "stars": 75
         },
         "6": {
             "name": "kaleidoscope",
@@ -1202,7 +1202,7 @@
                     "package_commit_hash": null
                 }
             ],
-            "stars": 13
+            "stars": 14
         },
         "7": {
             "name": "pytket-qiskit",
@@ -1564,7 +1564,7 @@
                     "package_commit_hash": "fa4967ee127eebac981eb04f875e7a1706e0574b"
                 }
             ],
-            "stars": 54
+            "stars": 57
         },
         "9": {
             "name": "mitiq",
@@ -1813,7 +1813,7 @@
                     "package_commit_hash": null
                 }
             ],
-            "stars": 227
+            "stars": 234
         },
         "10": {
             "name": "pennylane-qiskit",
@@ -2687,7 +2687,7 @@
                     "package_commit_hash": null
                 }
             ],
-            "stars": 81
+            "stars": 87
         },
         "14": {
             "name": "qiskit-rigetti",
@@ -3241,7 +3241,7 @@
                     "package_commit_hash": "fa4967ee127eebac981eb04f875e7a1706e0574b"
                 }
             ],
-            "stars": 394
+            "stars": 407
         },
         "17": {
             "name": "QPong",
@@ -3513,7 +3513,7 @@
                     "package_commit_hash": null
                 }
             ],
-            "stars": 2
+            "stars": null
         },
         "19": {
             "name": "QuantumCircuits.jl",
@@ -3599,7 +3599,7 @@
                     "package_commit_hash": null
                 }
             ],
-            "stars": 9
+            "stars": null
         },
         "20": {
             "name": "qiskit-toqm",
@@ -3725,7 +3725,7 @@
                     "package_commit_hash": null
                 }
             ],
-            "stars": 2
+            "stars": null
         },
         "21": {
             "name": "bosonic-qiskit",
@@ -3837,7 +3837,7 @@
                     "package_commit_hash": null
                 }
             ],
-            "stars": 18,
+            "stars": null,
             "contact_info": null,
             "alternatives": null,
             "affiliations": null
@@ -3966,7 +3966,7 @@
                     "package_commit_hash": null
                 }
             ],
-            "stars": 5
+            "stars": null
         },
         "23": {
             "name": "circuit-knitting-toolbox",
@@ -4083,7 +4083,7 @@
                 "coverages_check_command": []
             },
             "skip_tests": false,
-            "stars": 12,
+            "stars": null,
             "historical_test_results": [
                 {
                     "test_type": "stable",
@@ -4285,7 +4285,7 @@
                 "coverages_check_command": []
             },
             "skip_tests": false,
-            "stars": 16,
+            "stars": null,
             "historical_test_results": [
                 {
                     "test_type": "stable",
@@ -4493,7 +4493,7 @@
                 ],
                 "coverages_check_command": []
             },
-            "stars": 25,
+            "stars": null,
             "historical_test_results": [
                 {
                     "test_type": "stable",
@@ -4636,7 +4636,7 @@
             },
             "tier": "Extensions",
             "skip_tests": true,
-            "stars": 25
+            "stars": null
         },
         "5": {
             "name": "Quantum Random Access Optimization",
@@ -4719,7 +4719,7 @@
             },
             "tier": "Extensions",
             "skip_tests": false,
-            "stars": 22,
+            "stars": null,
             "historical_test_results": [
                 {
                     "test_type": "stable",
@@ -4862,7 +4862,7 @@
             "coverages_results": [],
             "tier": "Extensions",
             "skip_tests": true,
-            "stars": 48
+            "stars": null
         },
         "7": {
             "name": "qiskit-ionq",
@@ -4944,7 +4944,7 @@
                 "coverages_check_command": []
             },
             "skip_tests": false,
-            "stars": 25,
+            "stars": null,
             "historical_test_results": [
                 {
                     "test_type": "standard",
@@ -5107,7 +5107,7 @@
                 "coverages_check_command": []
             },
             "skip_tests": true,
-            "stars": 30
+            "stars": null
         },
         "9": {
             "name": "mthree",
@@ -5186,7 +5186,7 @@
                 "coverages_check_command": []
             },
             "skip_tests": false,
-            "stars": 19,
+            "stars": null,
             "historical_test_results": [
                 {
                     "test_type": "stable",
@@ -5330,7 +5330,7 @@
             "configuration": null,
             "skip_tests": true,
             "historical_test_results": [],
-            "stars": 36
+            "stars": null
         },
         "11": {
             "name": "qiskit-qec",
@@ -5354,7 +5354,7 @@
             "configuration": null,
             "skip_tests": true,
             "historical_test_results": [],
-            "stars": 26
+            "stars": null
         },
         "12": {
             "alternatives": null,
@@ -5371,7 +5371,7 @@
             "url": "https://github.com/Qiskit/qiskit-metal",
             "tests_results": [],
             "skip_tests": true,
-            "stars": 204
+            "stars": null
         }
     }
 }
