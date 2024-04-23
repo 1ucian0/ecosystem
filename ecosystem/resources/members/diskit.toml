@@ -11,7 +11,7 @@ styles_results = []
 coverages_results = []
 tier = "Community"
 skip_tests = false
-stars = 5
+stars = 8
 [[historical_test_results]]
 passed = false
 test_type = "stable"
