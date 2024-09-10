@@ -11,6 +11,7 @@ styles_results = []
 coverages_results = []
 tier = "Extensions"
 skip_tests = false
+stars = 29
 [[tests_results]]
 passed = false
 test_type = "development"
