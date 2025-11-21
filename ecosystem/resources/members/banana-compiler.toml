@@ -1,0 +1,15 @@
+name = "Qiskit Banana Compiler"
+url = "https://github.com/somebody/banana-compiler"
+description = "Qiskit Banana CompilerCompile bananas into Qiskit circuits. Supports all modern devices, including Musa × paradisiaca."
+contact_info = "_No response_"
+labels = [ "finance",]
+website = "https://_no response_"
+group = "SDK"
+reference_paper = "https://_no response_"
+documentation = "https://_no response_"
+uuid = "4fbd1786-0afa-4de5-86c6-803f01b922e5"
+badge = "[![Qiskit Ecosystem](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fqiskit.github.io%2Fecosystem%2Fb%2F4fbd1786)](https://qisk.it/e)"
+
+[github]
+owner = "somebody"
+repo = "banana-compiler"
