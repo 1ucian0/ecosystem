@@ -1,14 +1,10 @@
 [[categories]]
-name = "Other"
-description = "Projects that extend, interface with, or use Qiskit in interesting ways"
+name = "Application"
+description = "Helps run or work with higher-than-circuit or domain-specifc level of abstraction."
 
 [[categories]]
 name = "SDK"
-description = "A software development kit. Provides an interface to build software on top of it. "
-
-[[categories]]
-name = "Application"
-description = "Helps run or work with higher-than-circuit or domain-specifc level of abstraction."
+description = "A software development kit. Provides an interface to build software on top of it."
 
 [[categories]]
 name = "Tooling"
@@ -16,40 +12,40 @@ description = "Helps to develop quantum programs, such as IDEs, debuggers, or ot
 
 [[categories]]
 name = "Compute provider"
-description = "Provides access to remote quantum computers (or remote simulators) via Qiskit primitives"
+description = "Provides access to remote quantum computers (or remote simulators) via Qiskit primitives."
 link = "https://quantum.cloud.ibm.com/docs/en/api/qiskit/primitives"
 
 [[categories]]
 name = "Circuit simulator"
-description = "Simulates a quantum computer on your local classical computer"
+description = "Simulates a quantum computer on your local classical computer."
 
 [[categories]]
 name = "Converter"
-description = "Converts Qiskit objects (such as QuantumCircuit) for use in other programs or tools"
+description = "Converts Qiskit objects (such as QuantumCircuit) for use in other programs or tools."
 
 [[categories]]
 name = "Transpiler plugin"
-description = "Implements Qiskit's transpiler plugin interface to compile and optimize quantum circuits"
+description = "Implements Qiskit's transpiler plugin interface to compile and optimize quantum circuits."
 link = "https://quantum.cloud.ibm.com/docs/en/api/qiskit/transpiler_plugins"
 
 [[categories]]
 name = "Unitary synthesis plugin"
-description = "Implements Qiskit's unitary synthesis plugin interface to synthesize unitary operations into quantum circuits"
+description = "Implements Qiskit's unitary synthesis plugin interface to synthesize unitary operations into quantum circuits."
 link = "https://quantum.cloud.ibm.com/docs/en/api/qiskit/qiskit.transpiler.passes.synthesis.plugin.UnitarySynthesisPlugin"
 
 [[categories]]
 name = "High-level synthesis plugin"
-description = "Implements Qiskit's HLS plugin interface to synthesize quantum circuits from more abstract operations"
+description = "Implements Qiskit's HLS plugin interface to synthesize quantum circuits from more abstract operations."
 link = "https://quantum.cloud.ibm.com/docs/en/api/qiskit/qiskit.transpiler.passes.synthesis.plugin.HighLevelSynthesisPlugin"
 
 [[categories]]
 name = "Qiskit addon"
-description = "Enables algorithm discovery at the utility scale"
+description = "Enables algorithm discovery at the utility scale."
 link = "https://quantum.cloud.ibm.com/docs/en/guides/addons"
 
 [[categories]]
 name = "Game"
-description = "Games or playful educational resources"
+description = "Games or playful educational resources."
 
 [[categories]]
 name = "Paper artifact"
@@ -57,56 +53,55 @@ description = "Code or dataset needed to reproduce a specific paper. Probably, w
 
 [[labels]]
 name = "chemistry"
-description = "Applies quantum computing to chemistry"
+description = "Applies quantum computing to chemistry."
 
 [[labels]]
 name = "C"
-description = "API callable from C programming language"
+description = "API callable from C programming language."
 
 [[labels]]
 name = "C++"
-description = "API callable from C++ programming language"
+description = "API callable from C++ programming language."
 
 [[labels]]
 name = "Julia"
-description = "API callable from Julia programming language"
+description = "API callable from Julia programming language."
 
 [[labels]]
 name = "Rust"
-description = "API callable from Rust programming language"
+description = "API callable from Rust programming language."
 
 [[labels]]
 name = "OCaml"
-description = "API callable from OCaml programming language"
-
+description = "API callable from OCaml programming language."
 
 [[labels]]
 name = "error correction"
-description = "Performs or investigates quantum error correction"
+description = "Performs or investigates quantum error correction."
 
 [[labels]]
 name = "error mitigation"
-description = "Tools for mitigating errors"
+description = "Tools for mitigating errors."
 
 [[labels]]
 name = "finance"
-description = "Applies quantum computing to finance"
+description = "Applies quantum computing to finance."
 
 [[labels]]
 name = "QML"
-description = "Applies quantum computing to machine learning"
+description = "Applies quantum computing to machine learning."
 
 [[labels]]
 name = "optimization"
-description = "Applies quantum computing to optimization problems"
+description = "Applies quantum computing to optimization problems."
 
 [[labels]]
 name = "physics"
-description = "Applies quantum computing to physics"
+description = "Applies quantum computing to physics."
 
 [[labels]]
 name = "provider"
-description = "Implements a Qiskit provider or/and Qiskit primitives"
+description = "Implements a Qiskit provider or/and Qiskit primitives."
 link = "https://quantum.cloud.ibm.com/docs/en/api/qiskit/providers"
 
 [[labels]]
@@ -119,11 +114,11 @@ description = "Targets High-Performance Computing use-cases."
 
 [[labels]]
 name = "quantum information"
-description = "Tools for quantum information experiments"
+description = "Tools for quantum information experiments."
 
 [[labels]]
 name = "research"
-description = "Implements ideas from papers and/or cutting-edge research"
+description = "Implements ideas from papers and/or cutting-edge research."
 
 [[labels]]
 name = "demo"
@@ -141,3 +136,6 @@ description = "Builds and outputs Qiskit quantum circuits."
 name = "openqasm"
 description = "Interfaces with OpenQASM."
 
+[[categories]]
+name = "Other"
+description = "Projects that extend, interface with, or use Qiskit in interesting ways."
