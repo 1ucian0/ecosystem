@@ -1,0 +1,11 @@
+name = "gg"
+url = "https://gg"
+description = "gg"
+contact_info = "_No response_"
+labels = [ "_No response_",]
+website = "https://_no response_"
+group = "SDK"
+reference_paper = "https://_no response_"
+documentation = "https://_no response_"
+uuid = "93ce4694-e378-497b-9946-992ad2381df3"
+badge = "[![Qiskit Ecosystem](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fqiskit.github.io%2Fecosystem%2Fb%2F93ce4694)](https://qisk.it/e)"
