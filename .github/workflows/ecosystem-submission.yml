@@ -61,7 +61,6 @@ jobs:
     if: >
       startsWith(github.event.issue.title, '[Submission]:')
       && github.event.action == 'closed'
-      && contains(github.event.issue, 'commit_id')
       && contains(github.event.issue.labels.*.name, 'submission')
     runs-on: ubuntu-latest
     steps:
@@ -77,3 +76,4 @@ jobs:
           :stethoscope: Get support integrating with Qiskit, including updating your project to Qiskit 1.0, using our [documentation theme](https://github.com/Qiskit/qiskit_sphinx_theme), and integrating with the transpiler plugin system. Reach out to Frank Harkins via [email](mailto:francis.harkins@ibm.com) for any questions or suggestions about working with Qiskit.
 
           It's great having you as a part of the ecosystem!
+          ${{ toJSON(github.event.issue) }}
