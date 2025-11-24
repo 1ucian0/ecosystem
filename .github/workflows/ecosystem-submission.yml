@@ -8,9 +8,6 @@ name: Ecosystem | Submission
 on:
   issues:
     types: [opened, edited, reopened, closed]
-  pull_request:
-    types:
-      - closed
 
 jobs:
   submission_workflow:
@@ -63,7 +60,7 @@ jobs:
       cancel-in-progress: true
     if: >
       github.event.issue.pull_request.merged == true
-      && contains(github.event.pull_request.labels.*.name, 'submission')
+      && contains(github.event.issue.labels.*.name, 'submission')
     runs-on: ubuntu-latest
     steps:
     - name: Create comment on success
