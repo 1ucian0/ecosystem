@@ -42,7 +42,7 @@ jobs:
     # Create PR
     - name: Commit changes and create pull request
       id: cpr
-      uses: peter-evans/create-pull-request@v5
+      uses: peter-evans/create-pull-request@v7
       with:
         commit-message: Submission - Add ${{ steps.parse-issue.outputs.SUBMISSION_NAME }} to list.
         title: Add ${{ steps.parse-issue.outputs.SUBMISSION_NAME }} to list.
@@ -76,4 +76,6 @@ jobs:
           :stethoscope: Get support integrating with Qiskit, including updating your project to Qiskit 1.0, using our [documentation theme](https://github.com/Qiskit/qiskit_sphinx_theme), and integrating with the transpiler plugin system. Reach out to Frank Harkins via [email](mailto:francis.harkins@ibm.com) for any questions or suggestions about working with Qiskit.
 
           It's great having you as a part of the ecosystem!
-          ${{ toJSON(github.event.issue) }}
+          ${{ toJSON(github.event) }}
+          ---
+          ${{ toJSON(steps.cpr.outputs) }}
