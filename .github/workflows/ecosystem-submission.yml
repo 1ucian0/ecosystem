@@ -60,7 +60,7 @@ jobs:
       cancel-in-progress: true
     if: >
       github.event.pull_request.merged == true
-      && contains(github.event.issue.labels.*.name, 'submission')
+      && contains(github.event.pull_request.labels.*.name, 'submission')
     runs-on: ubuntu-latest
     steps:
     - name: Create comment on success
