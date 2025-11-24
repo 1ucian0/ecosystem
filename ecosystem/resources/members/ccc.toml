@@ -1,0 +1,11 @@
+name = "cc"
+url = "https://ccc"
+description = "cccc"
+contact_info = "_No response_"
+labels = [ "_No response_",]
+website = "https://_no response_"
+group = "SDK"
+reference_paper = "https://_no response_"
+documentation = "https://_no response_"
+uuid = "9f18a8e4-b9b7-4f03-b248-e3a4a5491539"
+badge = "[![Qiskit Ecosystem](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fqiskit.github.io%2Fecosystem%2Fb%2F9f18a8e4)](https://qisk.it/e)"
