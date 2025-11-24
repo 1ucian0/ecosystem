@@ -61,7 +61,7 @@ jobs:
     if: >
       startsWith(github.event.issue.title, '[Submission]:')
       && github.event.action == 'closed'
-      && contains(github.event.issue, commit_id)
+      && contains(github.event.issue, 'commit_id')
       && contains(github.event.issue.labels.*.name, 'submission')
     runs-on: ubuntu-latest
     steps:
