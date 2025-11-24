@@ -59,8 +59,7 @@ jobs:
       group: ci-${{ github.event.issue.title }}
       cancel-in-progress: true
     if: >
-      startsWith(github.event.issue.title, '[Submission]:')
-      && github.event.pull_request.merged == true
+      github.event.pull_request.merged == true
       && contains(github.event.issue.labels.*.name, 'submission')
     runs-on: ubuntu-latest
     steps:
