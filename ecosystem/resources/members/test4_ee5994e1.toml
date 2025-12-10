@@ -1,0 +1,7 @@
+name = "test 4"
+url = "https://test 4"
+description = "test 4"
+labels = []
+group = "Unitary synthesis plugin"
+packages = []
+uuid = "ee5994e1-ac76-4ebd-b3e5-8e485868a357"
