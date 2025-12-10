@@ -1,7 +1,7 @@
-name = "test 1"
-url = "https://test 1"
-description = "test 1"
+name = "test 3"
+url = "https://test_3"
+description = "test 3"
 labels = [ "_No response_",]
-group = "SDK"
+group = "High-level synthesis plugin"
 packages = []
-uuid = "7f875f0d-e7ac-4ab4-8670-72dae60eec8f"
+uuid = "47362ab1-235c-4ad0-91df-6bd2a91a46d6"
