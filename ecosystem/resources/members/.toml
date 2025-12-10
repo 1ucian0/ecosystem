@@ -1,0 +1,7 @@
+name = "test 2"
+url = "https://test 2"
+description = "test 2"
+labels = [ "_No response_",]
+group = "SDK"
+packages = []
+uuid = "34f4d4c8-6d09-421f-adef-87bb197a324b"
