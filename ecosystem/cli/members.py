@@ -31,9 +31,14 @@ class CliMembers:
         self.dao = DAO(path=self.resources_dir)
         self.logger = logger
 
-    def validate(self):
-        """validate members in <self.resources_dir>/members"""
+    def validate(self, name=None):
+        """validate members in <self.resources_dir>/members.
+        If name is not given, checks all.
+        Otherwise, all the members that start with name are checked
+        """
         for member in self.dao.get_all():
+            if name and not member.name_id.startswith(name):
+                continue
             passing, not_passing = validate_member(member)
             if not passing:
                 logger.error("%s has no validations?", member.name_id)

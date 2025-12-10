@@ -12,6 +12,5 @@ jobs:
       && contains(github.event.pull_request.labels.*.name, 'submission')
     runs-on: ubuntu-latest
     steps:
-      - id: get-id
       - name: Update stats
         run: echo "${{ github.event.pull_request }}"
