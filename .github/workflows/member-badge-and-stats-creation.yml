@@ -37,4 +37,5 @@ jobs:
       - name: Update PR
         uses: peter-evans/create-pull-request@v8
         with:
+          branch: ${{ github.event.pull_request.head.ref }}
           base: ${{ github.head_ref }}
