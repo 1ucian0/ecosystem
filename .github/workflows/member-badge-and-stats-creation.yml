@@ -18,6 +18,8 @@ jobs:
           id=$(echo ${{ github.event.pull_request.head.ref }} | cut -d- -f2 )
           echo "::set-output name=id::$id"
       - uses: actions/checkout@v5
+        with:
+          branch: ${{ github.event.pull_request.head.ref }}
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
@@ -34,8 +36,4 @@ jobs:
           git config user.email 'noreply@github.com'
           python manager.py members update_github ${{ steps.get-id.outputs.id }}
           git commit -am "Modify tracked file during workflow"
-      - name: Update PR
-        uses: peter-evans/create-pull-request@v8
-        with:
-          branch: ${{ github.event.pull_request.head.ref }}
-          base: ${{ github.head_ref }}
+          git push
