@@ -15,9 +15,8 @@ jobs:
       - name: Setup variables
         id: get-id
         run: |
-          id=$(echo ${{ github.event.pull_request.head.ref }} | cut -d_ -f2- )
+          id=$(echo ${{ github.event.pull_request.head.ref }} | cut -d- -f2 )
           echo "::set-output name=id::$id"
-
       - uses: actions/checkout@v5
       - name: Set up Python
         uses: actions/setup-python@v6
