@@ -37,5 +37,4 @@ jobs:
           author: GitHub <noreply@github.com>
           commit-message: Details for a new member
           branch: ${{ github.event.pull_request.head.ref }}
-
-
+          base: main
