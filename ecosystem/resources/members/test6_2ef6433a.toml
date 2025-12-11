@@ -1,0 +1,11 @@
+name = "test 6"
+url = "https://github.com/1ucian0/ecosystem"
+description = "test 6"
+labels = []
+group = "Transpiler plugin"
+packages = []
+uuid = "2ef6433a-cca4-469d-be96-3647bf73ea02"
+
+[github]
+owner = "1ucian0"
+repo = "ecosystem"
