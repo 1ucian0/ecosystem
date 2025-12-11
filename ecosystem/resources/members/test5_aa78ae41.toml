@@ -1,0 +1,7 @@
+name = "test_5"
+url = "https://test_5"
+description = "test_5"
+labels = []
+group = "High-level synthesis plugin"
+packages = []
+uuid = "aa78ae41-4605-41f9-bf00-af9e79dd8feb"
