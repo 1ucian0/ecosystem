@@ -44,7 +44,4 @@ jobs:
       - name: Push changes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          git fetch origin --quiet
-          git rebase --strategy-option=theirs origin/main --verbose
-          git push --verbose
+        run: git push --verbose
