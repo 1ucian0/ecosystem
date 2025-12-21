@@ -21,6 +21,7 @@ def get_community_repo() -> Member:
         description="Mock description for repo. wsdt",
         licence="Apache 2.0",
         labels=["mock", "tests", "wsdt"],
+        badge="https://qisk.it/e",
     )
 
 
@@ -71,19 +72,16 @@ class TestCli(TestCase):
             "reference_paper": "https://arxiv.org/abs/5555.22222",
             "github": {"owner": "somebody", "repo": "banana-compiler"},
             "group": "circuit manipulation",
+            "packages": [
+                "https://pypi.org/project/banana-compiler",
+                "https://pypi.org/project/banana-compiler-hpc",
+                "https://crates.io/crates/rusty-banana-compiler",
+                "https://marketplace.visualstudio.com/items?itemName=banana-code-assistance",
+            ],
         }
         self.assertEqual(len(retrieved_repos), 1)
         retrieved = list(retrieved_repos)[0].to_dict()
         self.assertIsInstance(retrieved.pop("uuid"), str)
-        badge_md = retrieved.pop("badge")
-        self.assertIsInstance(badge_md, str)
-        self.assertTrue(
-            badge_md.startswith(
-                "[![Qiskit Ecosystem](https://img.shields.io/"
-                "endpoint?style=flat&url=https"
-            )
-        )
-        self.assertTrue(badge_md.endswith("(https://qisk.it/e)"))
         self.assertEqual(expected, retrieved)
 
     def test_update_badges(self):
@@ -100,6 +98,9 @@ class TestCli(TestCase):
 
         # create badges
         cli_members.update_badges()
+
+        # gets a short url and updates the list in qisk.it/ecosystem-badges
+        cli_members.update_badge_list()
 
         badges_folder_path = f"{cli_members.current_dir}/badges"
         self.assertTrue(

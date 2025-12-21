@@ -1,45 +1,69 @@
 """Submission model."""
 
 import pprint
-from dataclasses import dataclass, fields
 from uuid import uuid4
-from urllib.parse import urlparse
+import re
 
+from .julia import JuliaData
 from .serializable import JsonSerializable, parse_datetime
 from .github import GitHubData
 from .pypi import PyPIData
+from .request import URL, request_json
 
 
-@dataclass
-class Member(JsonSerializable):
+class Member(JsonSerializable):  # pylint: disable=too-many-instance-attributes
     """main Members class that represent a single entry in the Ecosystem."""
 
-    # pylint: disable=too-many-instance-attributes
-    name: str
-    url: str | None = None
-    description: str | None = None
-    licence: str | None = None
-    contact_info: str | None = None
-    affiliations: str | None = None
-    labels: list[str] | None = None
-    ibm_maintained: bool = False
-    created_at: int | None = None
-    updated_at: int | None = None
-    website: str | None = None
-    group: str | None = None
-    category: str | None = None
-    reference_paper: str | None = None
-    documentation: str | None = None
-    packages: list[str] | None = None
-    uuid: str | None = None
-    github: GitHubData | None = None
-    pypi: dict[str, PyPIData] | None = None
+    def __init__(  # pylint: disable=too-many-arguments, too-many-locals
+        self,
+        name: str,
+        url: str | URL | None = None,
+        description: str | None = None,
+        licence: str | None = None,
+        contact_info: str | None = None,
+        affiliations: str | None = None,
+        labels: list[str] | None = None,
+        ibm_maintained: bool = False,
+        created_at: int | None = None,
+        updated_at: int | None = None,
+        website: str | None = None,
+        group: str | None = None,
+        category: str | None = None,
+        reference_paper: URL | None = None,
+        documentation: URL | None = None,
+        packages: list[URL] | None = None,
+        uuid: str | None = None,
+        badge: str | None = None,
+        github: GitHubData | None = None,
+        pypi: dict[str, PyPIData] | None = None,
+        julia: JuliaData | None = None,
+    ):
+        self.name = name
+        self.url = URL(url) if isinstance(url, str) else url
+        self.description = description
+        self.licence = licence
+        self.contact_info = contact_info
+        self.affiliations = affiliations
+        self.labels = labels
+        self.ibm_maintained = ibm_maintained
+        self.created_at = created_at
+        self.updated_at = updated_at
+        self.website = website
+        self.group = group
+        self.category = category
+        self.reference_paper = reference_paper
+        self.documentation = documentation
+        self.packages = packages
+        self.uuid = uuid
+        self.github = github
+        self.pypi = pypi
+        self.julia = julia
+        self.badge = badge
 
-    def __post_init__(self):
         self.__dict__.setdefault("created_at", parse_datetime("now"))
         self.__dict__.setdefault("updated_at", parse_datetime("now"))
         if self.github is None:
-            self.github = GitHubData.from_url(urlparse(self.url))
+            self.github = GitHubData.from_url(self.url)
         if self.uuid is None:
             self.uuid = str(uuid4())
         if self.labels is None:
@@ -61,8 +85,10 @@ class Member(JsonSerializable):
 
         Return: Member
         """
-        submission_fields = [f.name for f in fields(Member)]
+        submission_fields = vars(Member)["__static_attributes__"]
         filtered_dict = {k: v for k, v in dictionary.items() if k in submission_fields}
+        if "julia" in filtered_dict:
+            filtered_dict["julia"] = JuliaData.from_dict(filtered_dict["julia"])
         if "github" in filtered_dict:
             filtered_dict["github"] = GitHubData.from_dict(filtered_dict["github"])
         if "pypi" in filtered_dict:
@@ -75,11 +101,6 @@ class Member(JsonSerializable):
 
     def to_dict(self) -> dict:
         base_dict = super().to_dict()
-        base_dict["badge"] = (
-            "[![Qiskit Ecosystem](https://img.shields.io/endpoint?style=flat&url=https"
-            f"%3A%2F%2Fqiskit.github.io%2Fecosystem%2Fb%2F{self.short_uuid})]"
-            "(https://qisk.it/e)"
-        )
         if "ibm_maintained" in base_dict and base_dict["ibm_maintained"] is False:
             del base_dict["ibm_maintained"]
         return base_dict
@@ -100,19 +121,49 @@ class Member(JsonSerializable):
     @property
     def name_id(self):
         """
-        A unique and human-readable way to identify a submission
+        A unique and human-readable-ish way to identify a submission.
+        Remove all non-ASCII chars, lowers the case, and truncates until 10th char.
+        Plus short_uuid.
+
         It is used to create the TOML file name
         """
-        # TODO: it is not uniq tho. Maybe add a random number at the end?  pylint: disable=W0511
-        repo_dir = self.url.strip("/").split("/")[-1]
-        return repo_dir.lower().replace(".", "_")
+        flat_name = re.sub("[^A-Za-z0-9]+", "", self.name).lower()[:10]
+        return f"{flat_name}_{self.short_uuid}"
+
+    @property
+    def badge_md(self):
+        """Markdown with the badge for README"""
+        return (
+            f"[![Qiskit Ecosystem]({self.badge})](https://qisk.it/e)"
+            if self.badge
+            else None
+        )
 
     def update_github(self):
         """
         Updates all the GitHub information in the project.
         """
-        self.github.update_json()
-        self.github.update_owner_repo()
+        if self.github:
+            self.github.update_json()
+            self.github.update_owner_repo()
+
+    def _create_qisk_dot_it_link_for_badge(self):
+        data = {
+            "long_url": "https://img.shields.io/endpoint?style=flat&url="
+            f"https://qiskit.github.io/ecosystem/b/{self.short_uuid}",
+            "domain": "qisk.it",
+            "keyword": f"e-{self.short_uuid}",
+            "group_guid": "Bj9rgMHKfxH",
+            "title": f'Qiskit ecosystem "{self.name}" badge',
+            "tags": ["qiskit ecosystem badge", "permanent _do NOT remove_"],
+        }
+        response = request_json("https://api-ssl.bitly.com/v4/bitlinks", post=data)
+        return response["link"]
+
+    def update_badge(self):
+        """If not there yet, creates a new Bitly link for the badge"""
+        if self.badge is None:
+            self.badge = self._create_qisk_dot_it_link_for_badge()
 
     def update_pypi(self):
         """
@@ -121,22 +172,29 @@ class Member(JsonSerializable):
         for package_name in sorted(self.pypi.keys()):
             self.pypi[package_name].update_json()
 
+    def update_julia(self):
+        """
+        Updates all the Julia information in the project.
+        """
+        if self.julia:
+            self.julia.update_json()
+
     @classmethod
     def from_submission(cls, submission):
         """
         Takes a submission object and creates a very basic Member object
         """
-        # TODO? licence
         return Member(
             name=submission.name,
-            url=submission.source_url.geturl(),
+            url=submission.source_url,
             description=submission.description,
             contact_info=submission.contact_info,
             labels=submission.labels,
             ibm_maintained=submission.is_ibm_maintained,
-            website=submission.home_url.geturl(),
+            website=submission.home_url,
             group=submission.category,
-            reference_paper=submission.paper_url.geturl(),
-            documentation=submission.docs_url.geturl(),
+            reference_paper=submission.paper_url,
+            documentation=submission.docs_url,
             github=GitHubData.from_url(submission.source_url),
+            packages=submission.package_urls,
         )

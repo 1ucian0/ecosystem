@@ -4,6 +4,22 @@ from ecosystem.error_handling import logger
 from .base import MemberValidator
 from .labels import *
 
+# pylint: disable=pointless-string-statement
+
+"""  
+TODO json:
+ - check no member repetition
+ - check against schema
+TODO member:
+ - check license unification naming
+ - check that is has a category (or Other, otherwise)
+ - if label "research" check if there is a paper
+ - if cannot be fixed, collect an "issues" property in the member toml
+ - check description length
+ - check "website" is not the github repo or similar
+"""
+
+>>>>>>> main
 
 def _all_subclasses(cls):
     return set(cls.__subclasses__()).union(

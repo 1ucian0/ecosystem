@@ -42,7 +42,7 @@ jobs:
     # Create PR
     - name: Commit changes and create pull request
       id: cpr
-      uses: peter-evans/create-pull-request@v5
+      uses: peter-evans/create-pull-request@v7
       with:
         commit-message: Submission - Add ${{ steps.parse-issue.outputs.SUBMISSION_NAME }} to list.
         title: Add ${{ steps.parse-issue.outputs.SUBMISSION_NAME }} to list.
@@ -51,7 +51,7 @@ jobs:
 
           ---
           Closes #${{ github.event.issue.number }}
-        branch: submission-${{ github.event.issue.number }}
+        branch: submission-${{ steps.parse-issue.outputs.SUBMISSION_SHORT_UUID }}
         labels: submission
 
   followup_workflow:
@@ -61,24 +61,26 @@ jobs:
     if: >
       startsWith(github.event.issue.title, '[Submission]:')
       && github.event.action == 'closed'
-      && github.event.pull_request.merged == true
+      && github.event.issue.state_reason == 'completed'
       && contains(github.event.issue.labels.*.name, 'submission')
     runs-on: ubuntu-latest
     steps:
+    - id: get-id
+      run: |
+        id=$(echo ${{github.event.issue.title}} | cut -d: -f2- )
+        echo "::set-output name=id::$id"
     - name: Create comment on success
       uses: peter-evans/create-or-update-comment@v3
       with:
         issue-number: ${{ github.event.issue.number }}
         body: |
-          Hello @${{ github.event.issue.user.login }}! You joined the Qiskit ecosystem recently, here are some follow up actions you can take to make the most of the program:
+              Hello @${{ github.event.issue.user.login }},
 
-          :speech_balloon: Join other Qiskit ecosystem developers in the [Slack channel #qiskit-ecosystem](https://qiskit.slack.com/archives/C04RHE56N93) (if you are not in the Qiskit workspace yet, [sign up](https://qisk.it/join-slack))
+              **${{ steps.get-id.outputs.id }} is now part of the Qiskit Ecosystem**. Here are some follow up actions you can take to get the most out of the program:
 
-          :mega: Showcase your project by
+              - :speech_balloon: Join other Qiskit ecosystem developers in the Slack [channel `#qiskit-ecosystem`](https://qiskit.slack.com/archives/C04RHE56N93). If you are not in the Qiskit workspace yet, sign up at https://qisk.it/join-slack
+              - :white_check_mark: Use the [Qiskit theme](https://github.com/Qiskit/qiskit_sphinx_theme) for your documentation
+              - :stethoscope: Keep an eye on the criteria compliance
+              - :purple_heart: Add the [Qiskit Ecosystem badge](https://qisk.it/ecosystem-badges) to your `README.md`
 
-          * [Writing a blog for your project](https://github.com/qiskit-community/ecosystem/wiki/Write-a-Blog-for-your-Project): reach out to Abby Mitchell via Slack or [email](mailto:abby.s.mitchell@ibm.com) if you'd like to be featured on the Qiskit blog
-          * Presenting at a [Qiskit Demoday](https://github.com/Qiskit/feedback/wiki/Qiskit-DemoDays): reach out to Luciano Bello via Slack or [email](mailto:BEL@zurich.ibm.com) to request a slot to demo your project)
-
-          :stethoscope: Get support integrating with Qiskit, including updating your project to Qiskit 1.0, using our [documentation theme](https://github.com/Qiskit/qiskit_sphinx_theme), and integrating with the transpiler plugin system. Reach out to Frank Harkins via [email](mailto:francis.harkins@ibm.com) for any questions or suggestions about working with Qiskit.
-
-          It's great having you as a part of the ecosystem!
+              It is great to have you in the ecosystem.

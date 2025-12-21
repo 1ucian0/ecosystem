@@ -5,6 +5,7 @@ import tomllib
 import os
 from typing import Optional, Tuple
 from pathlib import Path
+import re
 from jsonpath import findall, query
 
 
@@ -31,9 +32,15 @@ class CliMembers:
         self.dao = DAO(path=self.resources_dir)
         self.logger = logger
 
-    def validate(self):
-        """validate members in <self.resources_dir>/members"""
+    def validate(self, name=None):
+        """validate members in <self.resources_dir>/members.
+        If <name> is not given, runs on all the members.
+        Otherwise, all the members with name_id that contains <name>
+        as substring are checked.
+        """
         for member in self.dao.get_all():
+            if name and name not in member.name_id:
+                continue
             passing, not_passing = validate_member(member)
             if not passing:
                 logger.error("%s has no validations?", member.name_id)
@@ -94,18 +101,83 @@ class CliMembers:
             ) as outfile:
                 json.dump(data, outfile, indent=4)
                 self.logger.info("Badge for %s has been updated.", project.name)
+            project.update_badge()
+            self.dao.update(project.name_id, badge=project.badge)
 
-    def update_github(self):
-        """Updates GitHub data."""
+    def update_badge_list(self):
+        """Updates badge list in qisk.it/ecosystem-badges."""
+        start_tag = "<!-- start:table-badge -->"
+        end_tag = "<!-- end:table-badge -->"
+
+        projects = []
         for project in self.dao.get_all():
+            if project.badge is None:
+                continue
+            projects.append(
+                (project.name, project.badge, project.badge_md, project.name_id)
+            )
+
+        projects.sort(key=lambda x: re.sub("[^A-Za-z0-9]+", "", x[0]).lower())
+
+        lines = [
+            "",
+            "<table>",
+            "<tr><th>Member</th><th>Badge (click for full size)</th><th>Markdown code</th></tr>",
+        ]
+        for name, badge, badge_md, name_id in projects:
+            lines.append(
+                "<tr>"
+                f'<td><a href="../ecosystem/resources/members/{name_id}.toml" >{name}</a></td>'
+                f'<td><img src="{badge}" /></td>'
+                f"<td>\n\n```markdown\n{badge_md}\n```\n\n</td>"
+                "</tr>"
+            )
+        lines.append("</table>\n")
+        readme_md = os.path.join(self.current_dir, "badges", "README.md")
+
+        with open(readme_md, "r") as readme_file:
+            content = readme_file.read()
+
+        to_replace = content[
+            content.find(start_tag) + len(start_tag) : content.rfind(end_tag)
+        ]
+
+        new_content = content.replace(to_replace, "\n".join(lines))
+
+        with open(readme_md, "w") as outfile:
+            outfile.write(new_content)
+
+    def update_github(self, name=None):
+        """
+        Updates GitHub data.
+        If <name> is not given, runs on all the members.
+        Otherwise, all the members with name_id that contains <name>
+        as substring are checked.
+        """
+        for project in self.dao.get_all():
+            if name and name not in project.name_id:
+                continue
             project.update_github()
             self.dao.update(project.name_id, github=project.github)
 
-    def update_pypi(self):
-        """Updates PyPI data."""
+    def update_pypi(self, name=None):
+        """
+        Updates PyPI data.
+        If <name> is not given, runs on all the members.
+        Otherwise, all the members with name_id that contains <name>
+        as substring are checked.
+        """
         for project in self.dao.get_all():
+            if name and name not in project.name_id:
+                continue
             project.update_pypi()
             self.dao.update(project.name_id, pypi=project.pypi)
+
+    def update_julia(self):
+        """Updates Julia data."""
+        for project in self.dao.get_all():
+            project.update_julia()
+            self.dao.update(project.name_id, julia=project.julia)
 
     @staticmethod
     def filter_data(
