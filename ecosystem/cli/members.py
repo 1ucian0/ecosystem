@@ -12,7 +12,6 @@ from jsonpath import findall, query
 from ecosystem.dao import DAO
 from ecosystem.member import Member
 from ecosystem.error_handling import logger
-from ecosystem.validation import validate_member
 
 
 class CliMembers:
@@ -38,14 +37,16 @@ class CliMembers:
         Otherwise, all the members with name_id that contains <name>
         as substring are checked.
         """
-        for member in self.dao.get_all():
-            if name and name not in member.name_id:
+        for project in self.dao.get_all():
+            if name and name not in project.name_id:
                 continue
-            passing, not_passing = validate_member(member)
-            if not passing:
-                logger.error("%s has no validations?", member.name_id)
+            validation_results = project.update_validations()
+            if not validation_results:
+                logger.error("%s has no validations?", project.name_id)
+            not_passing = [r for r in validation_results if not r.passed]
             if not not_passing:
-                logger.info("%s ✓", member.name_id)
+                logger.info("%s ✓", project.name_id)
+            self.dao.update(project.name_id, validation=project.validation)
 
     def add_repo_2db(
         self,

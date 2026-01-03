@@ -33,3 +33,11 @@ highest_supported_qiskit_release_date = 2023-03-21T21:05:35Z
 highest_supported_qiskit_version = "0.42.1"
 last_month_downloads = 28
 last_180_days_downloads = 159
+
+[validation.L09]
+id = "L09"
+status = "WARNING"
+details = "members should have, at least, one label. See the list of possible labels in https://github.com/Qiskit/ecosystem/blob/main/ecosystem/resources/labels.toml"
+affects = "labels"
+last_check = 2026-01-03T13:02:20
+failing_since = 2025-12-21T18:21:08

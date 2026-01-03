@@ -19,7 +19,6 @@ TODO member:
  - check "website" is not the github repo or similar
 """
 
->>>>>>> main
 
 def _all_subclasses(cls):
     return set(cls.__subclasses__()).union(
@@ -27,22 +26,31 @@ def _all_subclasses(cls):
     )
 
 
-def validate_member(member):
-    """Runs all the validation for a member"""
-    passing = []
-    not_passing = []
+def validators():
+    """Generator of Validator instances"""
     for subclass in _all_subclasses(MemberValidator):
         sc = subclass()
-        validation_name = (
-            f"{sc.__class__.__module__.replace('ecosystem.validation.','')}"
-            f".{str(sc.__class__.__name__)}"
-        )
-        try:
-            sc.validate(member)
-            passing.append(validation_name)
-        except NotImplementedError:
+        if (
+            sc.id is None
+            and sc.category is None
+            and not sc.validator_class.startswith("Test")
+        ):
             continue
+        yield sc
+
+
+def validate_member(member):
+    """Runs all the validation for a member"""
+    results = []
+    for validator in validators():
+        try:
+            validator.validate(member)
+        except NotImplementedError:
+            logger.error(
+                "the validation %s does not implement the method test",
+                validator.validator_class,
+            )
         except AssertionError as assertion:
             logger.error(str(assertion))
-            not_passing.append(validation_name)
-    return passing, not_passing
+        results.append(validator)
+    return results

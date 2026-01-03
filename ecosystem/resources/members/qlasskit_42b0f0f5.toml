@@ -29,3 +29,11 @@ version = "0.1.36"
 url = "https://pypi.org/project/qlasskit/"
 last_month_downloads = 151
 last_180_days_downloads = 776
+
+[validation.L09]
+id = "L09"
+status = "WARNING"
+details = "members should have, at least, one label. See the list of possible labels in https://github.com/Qiskit/ecosystem/blob/main/ecosystem/resources/labels.toml"
+affects = "labels"
+last_check = 2026-01-03T12:58:55
+failing_since = 2025-12-21T18:20:59

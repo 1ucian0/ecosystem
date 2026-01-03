@@ -22,3 +22,11 @@ total_dependent_repositories = 0
 total_dependent_packages = 0
 last_commit = 2024-06-15T20:19:28Z
 last_activity = 2025-12-08T19:31:02Z
+
+[validation.L09]
+id = "L09"
+status = "WARNING"
+details = "members should have, at least, one label. See the list of possible labels in https://github.com/Qiskit/ecosystem/blob/main/ecosystem/resources/labels.toml"
+affects = "labels"
+last_check = 2026-01-03T13:02:18
+failing_since = 2025-12-21T18:21:06

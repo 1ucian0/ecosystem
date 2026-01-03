@@ -24,17 +24,22 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
+    - name: Update stats
+      run: python manager.py members update_github
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Update validations for members
+      run: |
+        python manager.py ci update_validation_list
+        python manager.py members validate
+
     - name: Update badges
       env:
         BITLY_TOKEN: ${{ secrets.BITLY_TOKEN }}
       run: |
         python manager.py members update_badges
         python manager.py members update_badge_list
-
-    - name: Update stats
-      run: python manager.py members update_github
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Create PR for stats and badges update
       id: cpr

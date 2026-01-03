@@ -9,6 +9,8 @@ from .serializable import JsonSerializable, parse_datetime
 from .github import GitHubData
 from .pypi import PyPIData
 from .request import URL, request_json
+from .validation.base import FailedValidation
+from .validation import validate_member
 
 
 class Member(JsonSerializable):  # pylint: disable=too-many-instance-attributes
@@ -37,6 +39,7 @@ class Member(JsonSerializable):  # pylint: disable=too-many-instance-attributes
         github: GitHubData | None = None,
         pypi: dict[str, PyPIData] | None = None,
         julia: JuliaData | None = None,
+        validation: dict[str, FailedValidation] | None = None,
     ):
         self.name = name
         self.url = URL(url) if isinstance(url, str) else url
@@ -59,6 +62,7 @@ class Member(JsonSerializable):  # pylint: disable=too-many-instance-attributes
         self.pypi = pypi
         self.julia = julia
         self.badge = badge
+        self.validation = validation
 
         self.__dict__.setdefault("created_at", parse_datetime("now"))
         self.__dict__.setdefault("updated_at", parse_datetime("now"))
@@ -70,6 +74,8 @@ class Member(JsonSerializable):  # pylint: disable=too-many-instance-attributes
             self.labels = []
         if self.pypi is None:
             self.pypi = {}
+        if self.validation is None:
+            self.validation = {}
 
     @property
     def short_uuid(self):
@@ -97,6 +103,11 @@ class Member(JsonSerializable):  # pylint: disable=too-many-instance-attributes
                     {"package_name": project_name} | pypi_dict
                 )
                 filtered_dict["pypi"][project_name] = pypi_data
+        if "validation" in filtered_dict:
+            for validation_id, validation_dict in filtered_dict["validation"].items():
+                validation_data = FailedValidation(validation_id, **validation_dict)
+                filtered_dict["validation"][validation_id] = validation_data
+
         return Member(**filtered_dict)
 
     def to_dict(self) -> dict:
@@ -198,3 +209,41 @@ class Member(JsonSerializable):  # pylint: disable=too-many-instance-attributes
             github=GitHubData.from_url(submission.source_url),
             packages=submission.package_urls,
         )
+
+    def update_validations(self):
+        """
+        Runs validations on member self
+        """
+        validation_results = validate_member(self)
+        for validation_result in validation_results:
+            now = parse_datetime("now")
+            if validation_result.id in self.validation:
+                # The check was failing before. Is the issue still there?
+                if validation_result.passed:
+                    # Issue solved!
+                    del self.validation[validation_result.id]
+                else:
+                    # Issue still there.
+                    # Update last_check and, if status is a warning,
+                    # the details (they might contain more data)
+                    self.validation[validation_result.id].last_check = now
+                    if self.validation[validation_result.id].status != "IGNORE":
+                        self.validation[validation_result.id].details = (
+                            validation_result.details
+                        )
+                continue
+
+            if not validation_result.passed:
+                if "METADATA" == validation_result.category:
+                    status = "WARNING"
+                else:
+                    status = None
+                self.validation[validation_result.id] = FailedValidation(
+                    validation_result.id,
+                    status,
+                    details=validation_result.details,
+                    affects=validation_result.affects,
+                    failing_since=now,
+                    last_check=now,
+                )
+        return validation_results

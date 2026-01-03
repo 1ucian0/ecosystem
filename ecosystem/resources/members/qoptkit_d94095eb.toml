@@ -21,3 +21,11 @@ description = "Optical circuits in Qiskit. Translate Qiskit circuits to quantum-
 total_dependent_repositories = 0
 total_dependent_packages = 0
 last_commit = 2024-03-10T17:29:40Z
+
+[validation.L09]
+id = "L09"
+status = "WARNING"
+details = "members should have, at least, one label. See the list of possible labels in https://github.com/Qiskit/ecosystem/blob/main/ecosystem/resources/labels.toml"
+affects = "labels"
+last_check = 2026-01-03T13:02:21
+failing_since = 2025-12-21T18:21:10
