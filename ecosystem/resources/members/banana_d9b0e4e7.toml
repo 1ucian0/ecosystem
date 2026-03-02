@@ -1,0 +1,7 @@
+name = "banana"
+url = "https://banana"
+description = "banana"
+labels = [ "finance", "Rust",]
+group = "Unitary synthesis plugin"
+packages = []
+uuid = "d9b0e4e7-300b-46f7-8b7d-1413de994f77"
