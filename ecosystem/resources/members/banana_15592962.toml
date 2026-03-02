@@ -1,0 +1,9 @@
+name = "banana"
+submission_number = 355
+url = "https://banana"
+description = "banana"
+contact_info = "banana"
+labels = [ "Julia",]
+group = "Transpiler plugin"
+packages = []
+uuid = "15592962-9255-4bfb-be93-55b2ca89bb76"
