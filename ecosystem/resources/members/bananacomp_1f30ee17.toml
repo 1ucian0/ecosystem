@@ -1,0 +1,7 @@
+name = "banana compiler"
+url = "https://banana"
+description = "banana description"
+labels = [ "error correction, error mitigation",]
+group = "Transpiler plugin"
+packages = []
+uuid = "1f30ee17-d663-4f3e-80ba-7ea6263d35fc"
