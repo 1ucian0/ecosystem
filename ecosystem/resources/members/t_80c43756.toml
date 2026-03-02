@@ -1,0 +1,7 @@
+name = "t"
+url = "https://t"
+description = "t"
+labels = [ "chemistry, C, physics, Java",]
+group = "Application"
+packages = []
+uuid = "80c43756-94e9-41d2-8af2-3615b243c160"
