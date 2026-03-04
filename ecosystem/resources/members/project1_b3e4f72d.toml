@@ -1,0 +1,12 @@
+name = "project 1"
+submission_number = 397
+url = "https://github.com/1ucian0/python-lattice"
+description = "project 1"
+labels = []
+group = "Application"
+packages = []
+uuid = "b3e4f72d-184c-492b-a722-11cf5676e586"
+
+[github]
+owner = "1ucian0"
+repo = "python-lattice"
