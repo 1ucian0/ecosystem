@@ -1,0 +1,15 @@
+name = "project 2"
+submission_number = 399
+url = "https://github.com/1ucian0/python-lattice"
+description = "project 2"
+labels = []
+group = "Unitary synthesis plugin"
+packages = []
+uuid = "7845f68a-6307-478f-8279-abea488ace94"
+
+[github]
+owner = "1ucian0"
+repo = "python-lattice"
+
+[pypi.googlescholar]
+package_name = "googlescholar"
