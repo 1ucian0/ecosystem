@@ -149,7 +149,7 @@ class CliMembers:
             with open(os.path.join(output_directory, filename), "w") as outfile:
                 json.dump(data_under_revision, outfile, indent=4)
                 self.logger.info(
-                    "Example Badge endpoint (status=Under revision): %s",
+                    "Example Badge endpoint (status=Under review): %s",
                     os.path.join(output_directory, filename),
                 )
         for project in self.dao.get_all(name):
@@ -188,15 +188,59 @@ class CliMembers:
 
     def update_docs_assets(self):
         """Updates the files in docs/assets/ to build the docs"""
+        summary_projects = self._all_members_summary(
+            "status", "maturity", "category", "labels", "interfaces"
+        )
         self.update_badge_list()
-        self.update_assets_status()
+        self.update_assets_status(summary_projects)
         self.update_assets_maturity()
         self.update_assets_categories()
         self.update_assets_labels()
         self.update_assets_interfaces()
 
-    def update_assets_status(self):
+    def _all_members_summary(self, *classifications):
+        """
+        <classifications> is a list of attributes in each project to extract.
+        Returns a dict with each of the classification as a key and, as value, a dict
+        with {classification_name: Project}
+        """
+
+        classification_summary = {}
+        for classification in classifications:
+            classification_summary[classification] = {
+                i: []
+                for i in getattr(self.classifications_toml, f"{classification}_names")
+            }
+            classification_summary[classification][None] = []
+        for project in self.dao.get_all():
+            for classification in classifications:
+                value = getattr(project, classification)
+                if isinstance(value, list):
+                    for each_value in value:
+                        classification_summary[classification][each_value].append(
+                            project
+                        )
+                else:
+                    classification_summary[classification][
+                        getattr(project, classification)
+                    ].append(project)
+        return classification_summary
+
+    def update_assets_status(self, summary_projects):
         """Updates status.json and status.md docs/assets/"""
+        summary = {}
+        for status in self.classifications_toml.status_names:
+            summary[status] = sum(
+                1
+                for member in summary_projects.values()
+                if member.get("status") == status
+            )
+        summary["Member"] += sum(
+            1 for member in summary_projects.values() if member.get("status") is None
+        )
+        summary["member_in_website"] = (
+            summary["Qiskit Project"] + summary["Member"] + summary["Under revision"]
+        )
         self.update_assets_classification("status", "status classification")
 
     def update_assets_maturity(self):
@@ -415,15 +459,15 @@ class CliMembers:
             self.dao.update(project.name_id, checks=project.checks)
 
     def update_status(self, name=None):
-        """Check if a project should be moved to "Under review" or "Alumni" """
+        """Check if a project should be moved to "Under revision" or "Alumni" """
         for project in self.dao.get_all(name):
             if project.status == "Qiskit Project":
                 # Qiskit Project status is governed differently,
                 # not via checkups in Qiskit Ecosystem.
                 continue
 
-            if project.status == "Under review":
-                # reset "Under review" status. It will be set back if it is still true.
+            if project.status == "Under revision":
+                # reset "Under revision" status. It will be set back if it is still true.
                 project.status = None
 
             for check in project.checks.values():
@@ -439,7 +483,7 @@ class CliMembers:
                     project.status = "Alumni"
                 else:
                     # still in cure period
-                    project.status = "Under review"
+                    project.status = "Under revision"
             self.dao.update(project.name_id, status=project.status)
 
     def update_maturity(self, name=None):
