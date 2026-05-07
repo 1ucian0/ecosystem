@@ -25,6 +25,7 @@ class Submission:
     labels: list[str]
     interface: list[str]
     terms: bool
+    maturity: str
     pattern_steps: list[str]
     source_url: URL
     home_url: URL
