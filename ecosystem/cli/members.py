@@ -181,9 +181,9 @@ class CliMembers:
             ) as outfile:
                 json.dump(data, outfile, indent=4)
                 self.logger.info(
-                    "Badge %s endpoint: %s",
-                    project.name,
+                    "Badge endpoint %s for %s",
                     os.path.join(output_directory, str(project.short_uuid)),
+                    project.name,
                 )
 
     def update_docs_assets(self):
