@@ -43,7 +43,7 @@ jobs:
         id: get-id
         run: |
           id=$(echo ${{ github.event.pull_request.head.ref }} | cut -d- -f2 )
-          echo "::set-output name=id::$id"
+          echo "id=$id" >> $GITHUB_OUTPUT
       - name: Initial validatation
         run: python manager.py ci validate_member ${{ steps.get-id.outputs.id }}
       - name: Create sections
