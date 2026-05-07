@@ -21,11 +21,9 @@ jobs:
             python-version: '3.13'
         - name: Install tox
           run: python -m pip install -U tox
-        - name: Create new badges, if any
+        - name: Build website
           env:
             BITLY_TOKEN: ${{ secrets.BITLY_TOKEN }}
-          run: python manager.py members update_badge
-        - name: Build website
           run: tox -e website
         - name: Upload Artifacts
           uses: actions/upload-pages-artifact@v4
