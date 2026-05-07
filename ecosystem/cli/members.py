@@ -188,17 +188,17 @@ class CliMembers:
 
     def update_docs_assets(self):
         """Updates the files in docs/assets/ to build the docs"""
-        summary_projects = self._all_members_summary(
+        projects_per_classification = self._all_projects_classifications(
             "status", "maturity", "category", "labels", "interfaces"
         )
         self.update_badge_list()
-        self.update_assets_status(summary_projects)
-        self.update_assets_maturity()
-        self.update_assets_categories()
-        self.update_assets_labels()
-        self.update_assets_interfaces()
+        self.update_assets_status(projects_per_classification["status"])
+        self.update_assets_maturity(projects_per_classification["maturity"])
+        self.update_assets_categories(projects_per_classification["category"])
+        self.update_assets_labels(projects_per_classification["labels"])
+        self.update_assets_interfaces(projects_per_classification["interfaces"])
 
-    def _all_members_summary(self, *classifications):
+    def _all_projects_classifications(self, *classifications):
         """
         <classifications> is a list of attributes in each project to extract.
         Returns a dict with each of the classification as a key and, as value, a dict
@@ -216,50 +216,52 @@ class CliMembers:
             for classification in classifications:
                 value = getattr(project, classification)
                 if isinstance(value, list):
+                    if len(value) == 0:
+                        classification_summary[classification][None].append(project)
                     for each_value in value:
-                        classification_summary[classification][each_value].append(
-                            project
-                        )
+                        if each_value in classification_summary[classification]:
+                            classification_summary[classification][each_value].append(
+                                project
+                            )
+                        else:
+                            classification_summary[classification][None].append(project)
                 else:
-                    classification_summary[classification][
-                        getattr(project, classification)
-                    ].append(project)
+                    if value in classification_summary[classification]:
+                        classification_summary[classification][value].append(project)
+                    else:
+                        classification_summary[classification][None].append(project)
         return classification_summary
 
-    def update_assets_status(self, summary_projects):
+    def update_assets_status(self, projects):
         """Updates status.json and status.md docs/assets/"""
-        summary = {}
-        for status in self.classifications_toml.status_names:
-            summary[status] = sum(
-                1
-                for member in summary_projects.values()
-                if member.get("status") == status
-            )
-        summary["Member"] += sum(
-            1 for member in summary_projects.values() if member.get("status") is None
+        projects["Member"] += projects[None]
+        del projects[None]
+        projects["total_in_website"] = (
+            len(projects["Member"])
+            + len(projects["Qiskit Project"])
+            + len(projects["Under revision"])
         )
-        summary["member_in_website"] = (
-            summary["Qiskit Project"] + summary["Member"] + summary["Under revision"]
-        )
-        self.update_assets_classification("status", "status classification")
+        self.update_assets_classification("status", "status classification", projects)
 
-    def update_assets_maturity(self):
+    def update_assets_maturity(self, projects):
         """Updates maturity.json and maturity.md docs/assets/"""
-        self.update_assets_classification("maturity", "maturity level")
+        self.update_assets_classification("maturity", "maturity level", projects)
 
-    def update_assets_categories(self):
+    def update_assets_categories(self, projects):
         """Updates category.json and categories.md docs/assets/"""
-        self.update_assets_classification("category", "category")
+        self.update_assets_classification("category", "category", projects)
 
-    def update_assets_labels(self):
+    def update_assets_labels(self, projects):
         """Updates labels.json and labels.md docs/assets/"""
-        self.update_assets_classification("labels", "label")
+        self.update_assets_classification("labels", "label", projects)
 
-    def update_assets_interfaces(self):
+    def update_assets_interfaces(self, projects):
         """Updates interfaces.json and interfaces.md docs/assets/"""
-        self.update_assets_classification("interfaces", "interface")
+        self.update_assets_classification("interfaces", "interface", projects)
 
-    def update_assets_classification(self, classification, classification_singular):
+    def update_assets_classification(
+        self, classification, classification_singular, projects
+    ):
         """Updates docs/assets/<classification>.json and docs/assets/<classification>.md"""
         assets_dir = os.path.join(self.current_dir, "docs", "assets")
 
@@ -302,7 +304,18 @@ class CliMembers:
             if os.path.isfile(section_text_md):
                 with open(section_text_md, "r") as file:
                     description = file.read()
-            lines += [f"## {name}", "\n\n", description, "\n\n"]
+            lines += [
+                f"## {name}",
+                "\n\n",
+            ]
+            if len(projects[name]):
+                lines.append(
+                    f'??? note "There are {len(projects[name])} projects with this classification"'
+                )
+                lines += [f"\n     - {p.name}" for p in projects[name]]
+            else:
+                lines.append("**No project with this classification**")
+            lines += ["\n\n", description, "\n\n"]
 
         with open(classification_json, "w") as f:
             json.dump(short_description, f)
