@@ -177,7 +177,7 @@ name = "Member"
 description = "The project is an approved member of the Qiskit Ecosystem"
 
 [[status]]
-name = "Under review"
+name = "Under revision"
 description = "The project needs to review some of the check up issues to stay in the Qiskit Ecosystem"
 
 [[status]]

@@ -14,9 +14,9 @@ If you want to change the badge style, follow the instructions in [Change the ba
 
 Additionally, the Qiskit Ecosystem badge is also a way to signal the project maintainer the [membership status](status.md):
 
-If a project badge looks like ![under revision](https://img.shields.io/endpoint?url=https://qiskit.github.io/ecosystem/b/example_under-revision) this means that the project is not passing some of the Qiskit Ecosystem criteria and it is being considered for removal.
+If a project badge looks like ![under revision badge](https://img.shields.io/endpoint?url=https://qiskit.github.io/ecosystem/b/example_under-revision) this means that the project is not passing some of the Qiskit Ecosystem criteria and it is being considered for removal.
 Check out the project page for details.
-Once a project gets removed, their badge turn into ![under revision](https://img.shields.io/endpoint?url=https://qiskit.github.io/ecosystem/b/example_alumni)
+Once a project gets removed, their badge turn into ![alumni badge](https://img.shields.io/endpoint?url=https://qiskit.github.io/ecosystem/b/example_alumni)
 
 ## Change the badge style
 
