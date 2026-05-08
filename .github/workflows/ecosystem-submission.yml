@@ -74,7 +74,7 @@ jobs:
       with:
         comment-id: ${{ steps.fc.outputs.comment-id }}
         issue-number: ${{ github.event.issue.number }}
-        token: ${{ secrets.REPO_SCOPED_TOKEN }}
+        token: ${{ secrets.GITHUB_TOKEN }}
         edit-mode: replace
         body: |
           The submission is validated :white_check_mark:
@@ -98,7 +98,7 @@ jobs:
       with:
         comment-id: ${{ steps.fc.outputs.comment-id }}
         issue-number: ${{ github.event.issue.number }}
-        token: ${{ secrets.REPO_SCOPED_TOKEN }}
+        token: ${{ secrets.GITHUB_TOKEN }}
         edit-mode: replace
         body: |
           The submission failed :x:
