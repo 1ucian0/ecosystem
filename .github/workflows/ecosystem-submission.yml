@@ -10,9 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       python-version: "3.13"
-    permissions:
-      contents: write
-      pull-requests: write
     steps:
     - uses: actions/checkout@v6
     - name: Set up Python ${{ env.python-version }}
@@ -40,12 +37,9 @@ jobs:
 
     - name: Commit changes and create pull request
       id: cpr
-      uses: peter-evans/create-pull-request@v8
+      uses: peter-evans/create-pull-request@v7
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}  # ${{ secrets.REPO_SCOPED_TOKEN }}
         draft: always-true
-        committer: qiskit-bot <qiskit-bot@users.noreply.github.com>
-        author: qiskit-bot <qiskit-bot@users.noreply.github.com>
         commit-message: |
           Submission - Add ${{ steps.parse-issue.outputs.SUBMISSION_NAME }} as a member
         
