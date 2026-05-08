@@ -42,7 +42,7 @@ jobs:
       id: cpr
       uses: peter-evans/create-pull-request@v8
       with:
-        token: ${{ secrets.REPO_SCOPED_TOKEN }}
+        token: ${{ secrets.GITHUB_TOKEN }}  # ${{ secrets.REPO_SCOPED_TOKEN }}
         draft: always-true
         committer: qiskit-bot <qiskit-bot@users.noreply.github.com>
         author: qiskit-bot <qiskit-bot@users.noreply.github.com>
