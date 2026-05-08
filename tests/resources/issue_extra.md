@@ -4,9 +4,7 @@ Qiskit Banana Compiler
 
 ### Description
 
-```text
 Compile bananas into Qiskit quantum circuits. Supports all modern devices, including Musa × paradisiaca.
-```
 
 ### Contact email
 
