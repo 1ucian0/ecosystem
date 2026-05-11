@@ -6,7 +6,7 @@ on:
 
 jobs:
   submission_workflow:
-    if: contains(github.event.issue.labels.*.name, 'submission')
+    if: contains(github.event.issue.labels.*.name, 'submission') && github.event.issue.closed == false
     runs-on: ubuntu-latest
     env:
       python-version: "3.13"
