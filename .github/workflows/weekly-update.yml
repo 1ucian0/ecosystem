@@ -52,6 +52,7 @@ jobs:
       id: cpr
       uses: peter-evans/create-pull-request@v7
       with:
+        author: qiskit-bot <qiskit-bot@users.noreply.github.com>
         token: ${{ secrets.REPO_SCOPED_TOKEN }}
         commit-message: Member data update for ${{ env.dateIseconds }}
         title: Member data update for ${{ env.date_bdY }}
