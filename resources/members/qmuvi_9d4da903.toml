@@ -39,6 +39,7 @@ package_name = "qmuvi"
 version = "0.3.0"
 last_release_date = 2025-09-04T08:33:57
 url = "https://pypi.org/project/qmuvi/"
+development_status = "2 - Pre-Alpha"
 requires_qiskit = "<3.0.0,>=2.1.2"
 compatible_with_qiskit_v1 = false
 compatible_with_qiskit_v2 = true

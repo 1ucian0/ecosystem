@@ -34,6 +34,7 @@ package_name = "gulps"
 version = "0.3.6"
 last_release_date = 2026-03-27T23:49:53
 url = "https://pypi.org/project/gulps/"
+development_status = "4 - Beta"
 requires_qiskit = "<3,>=2.0"
 compatible_with_qiskit_v1 = false
 compatible_with_qiskit_v2 = true
