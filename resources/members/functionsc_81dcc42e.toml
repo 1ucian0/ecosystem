@@ -27,5 +27,5 @@ last_release_date = 2026-08-20
 url = "https://pypi.org/project/qiskit-ibm-catalog/"
 status = "active"
 maintainers = ["https://pypi.org/org/qiskit/", "https://pypi.org/user/Tansito/"]
-last_month_downloads = 6658
-last_180_days_downloads = 41196
+last_month_downloads = 6600
+last_180_days_downloads = 40980

@@ -38,5 +38,5 @@ description = "Python client for Azure Quantum"
 url = "https://pypi.org/project/azure-quantum/"
 status = "active"
 maintainers = ["https://pypi.org/user/microsoft/"]
-last_month_downloads = 25328
-last_180_days_downloads = 144737
+last_month_downloads = 25620
+last_180_days_downloads = 144522

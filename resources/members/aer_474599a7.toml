@@ -24,7 +24,7 @@ description = "Aer is a high performance simulator for quantum circuits that inc
 total_dependent_repositories = 0
 total_dependent_packages = 0
 last_commit = 2026-05-25
-last_activity = 2026-09-03
+last_activity = 2026-09-06
 
 [badge]
 url = "https://qisk.it/e-474599a7"
@@ -44,8 +44,8 @@ compatible_with_qiskit_v1 = true
 compatible_with_qiskit_v2 = true
 highest_supported_qiskit_release_date = 2026-07-02
 highest_supported_qiskit_version = "2.5.0"
-last_month_downloads = 475787
-last_180_days_downloads = 3681430
+last_month_downloads = 465718
+last_180_days_downloads = 3669970
 
 [pypi.qiskit-aer-gpu]
 package_name = "qiskit-aer-gpu"
@@ -61,8 +61,8 @@ compatible_with_qiskit_v1 = true
 compatible_with_qiskit_v2 = true
 highest_supported_qiskit_release_date = 2026-07-02
 highest_supported_qiskit_version = "2.5.0"
-last_month_downloads = 1845
-last_180_days_downloads = 21389
+last_month_downloads = 1804
+last_180_days_downloads = 21273
 
 [pypi.qiskit-aer-gpu-cu11]
 package_name = "qiskit-aer-gpu-cu11"
@@ -78,8 +78,8 @@ compatible_with_qiskit_v1 = true
 compatible_with_qiskit_v2 = true
 highest_supported_qiskit_release_date = 2026-07-02
 highest_supported_qiskit_version = "2.5.0"
-last_month_downloads = 1451
-last_180_days_downloads = 10588
+last_month_downloads = 1677
+last_180_days_downloads = 10676
 
 [checks.P10]
 since = 2026-07-14
