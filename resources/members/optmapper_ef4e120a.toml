@@ -22,7 +22,7 @@ license = "Apache-2.0"
 description = "Mapping combinatorial optimization problems to quantum computers"
 estimated_contributors = 23
 total_dependent_repositories = 6
-total_dependent_packages = 3
+total_dependent_packages = 4
 last_commit = 2026-09-02
 last_activity = 2026-09-02
 
@@ -44,5 +44,5 @@ compatible_with_qiskit_v1 = true
 compatible_with_qiskit_v2 = true
 highest_supported_qiskit_release_date = 2026-04-24
 highest_supported_qiskit_version = "2.4.1"
-last_month_downloads = 5350
-last_180_days_downloads = 18320
+last_month_downloads = 5307
+last_180_days_downloads = 18333
