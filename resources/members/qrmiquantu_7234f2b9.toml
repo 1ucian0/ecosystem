@@ -35,5 +35,5 @@ description = "Quantum Resource Management Interface(QRMI)"
 url = "https://pypi.org/project/qrmi/"
 status = "active"
 maintainers = ["https://pypi.org/user/ohtanim/"]
-last_month_downloads = 1882
-last_180_days_downloads = 6293
+last_month_downloads = 2019
+last_180_days_downloads = 6459
