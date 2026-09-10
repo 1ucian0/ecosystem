@@ -41,7 +41,7 @@ maintainers = [
   "https://pypi.org/user/AIforQuantum/",
 ]
 last_month_downloads = 817
-last_180_days_downloads = 3981
+last_180_days_downloads = 4038
 
 [pypi.qiskit-mcp-server]
 package_name = "qiskit-mcp-server"
@@ -61,7 +61,7 @@ compatible_with_qiskit_v2 = true
 highest_supported_qiskit_release_date = 2026-08-13
 highest_supported_qiskit_version = "2.5.2"
 last_month_downloads = 2686
-last_180_days_downloads = 10579
+last_180_days_downloads = 10668
 
 [pypi.qiskit-docs-mcp-server]
 package_name = "qiskit-docs-mcp-server"
@@ -127,7 +127,7 @@ maintainers = [
   "https://pypi.org/user/AIforQuantum/",
 ]
 last_month_downloads = 628
-last_180_days_downloads = 3648
+last_180_days_downloads = 3663
 
 [checks.P10]
 since = 2026-08-18
