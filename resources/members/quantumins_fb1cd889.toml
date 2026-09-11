@@ -47,4 +47,4 @@ compatible_with_qiskit_v2 = true
 highest_supported_qiskit_release_date = 2025-08-19
 highest_supported_qiskit_version = "2.1.2"
 last_month_downloads = 758
-last_180_days_downloads = 11185
+last_180_days_downloads = 11192

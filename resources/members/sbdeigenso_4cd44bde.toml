@@ -17,7 +17,7 @@ repo = "sbd-eigensolver-python"
 stars = 2
 license = "Apache-2.0"
 description = "Python wrapper to SBD eigensolver"
-last_commit = 2026-09-09
+last_commit = 2026-09-10
 last_activity = 2026-09-09
 
 [pypi.sbd-eigensolver]

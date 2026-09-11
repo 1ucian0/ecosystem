@@ -23,7 +23,7 @@ description = "Faster simulation of fermionic quantum circuits."
 estimated_contributors = 12
 total_dependent_repositories = 22
 total_dependent_packages = 8
-last_commit = 2026-09-09
+last_commit = 2026-09-10
 last_activity = 2026-09-10
 
 [badge]

@@ -24,7 +24,7 @@ description = "A platform-agnostic quantum runtime framework"
 estimated_contributors = 35
 total_dependent_repositories = 42
 total_dependent_packages = 23
-last_commit = 2026-09-09
+last_commit = 2026-09-10
 last_activity = 2026-09-09
 
 [badge]
@@ -46,5 +46,5 @@ compatible_with_qiskit_v1 = true
 compatible_with_qiskit_v2 = true
 highest_supported_qiskit_release_date = 2026-04-24
 highest_supported_qiskit_version = "2.4.1"
-last_month_downloads = 8989
-last_180_days_downloads = 103167
+last_month_downloads = 8926
+last_180_days_downloads = 102749
