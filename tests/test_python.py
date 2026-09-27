@@ -5,6 +5,9 @@ from unittest import TestCase
 from unittest.mock import patch
 
 from ecosystem.error_handling import EcosystemError
+from ecosystem.github import GitHubData
+from ecosystem.member import Member
+from ecosystem.pypi import PyPIData
 from ecosystem.python import PythonData, parse_setup_cfg, parse_setup_py
 
 OWNER = "banana-org"
@@ -400,3 +403,110 @@ class TestPythonDataFetching(PythonDataTestCase):
         self.assertEqual(OWNER, data.owner)
         self.assertEqual(REPO, data.repo)
         self.assertEqual("packages/compiler", data.path)
+
+
+class TestMemberUpdatePython(PythonDataTestCase):
+    """`Member.update_python` is the entry point for the section."""
+
+    @staticmethod
+    def member(**kwargs):
+        """A member with a GitHub section, which is what the updater needs."""
+        return Member(
+            name="Banana Compiler",
+            url=f"https://github.com/{OWNER}/{REPO}",
+            uuid="banana-uuid-0000-0000-000000000000",
+            maturity="experimental",
+            github=GitHubData(owner=OWNER, repo=REPO),
+            **kwargs,
+        )
+
+    @staticmethod
+    def fake_request(manifest=PYPROJECT, name="pyproject.toml"):
+        """Serves a directory listing holding `name`, then that manifest."""
+
+        def request(url, **kwargs):
+            if str(url).endswith(("/contents/", "/")):
+                return listing(name)
+            return kwargs["parser"](manifest)
+
+        return request
+
+    def test_section_is_created_from_the_repository(self):
+        """The distribution name is discovered, so the updater creates the section."""
+        member = self.member()
+        with patch("ecosystem.python.request_json", side_effect=self.fake_request()):
+            member.update_python()
+        self.assertEqual(["banana-compiler"], list(member.python))
+        self.assertEqual("0.3.1", member.python["banana-compiler"].version)
+
+    def test_no_section_for_a_project_that_publishes(self):
+        """A published project is already described by its `[pypi.*]` section."""
+        member = self.member(pypi={"banana-compiler": PyPIData("banana-compiler")})
+        with patch("ecosystem.python.request_json") as request:
+            member.update_python()
+        self.assertEqual({}, member.python)
+        request.assert_not_called()
+
+    def test_an_existing_section_is_refreshed_even_when_published(self):
+        """A section added on purpose keeps being updated, to cross-check the release."""
+        member = self.member(
+            pypi={"banana-compiler": PyPIData("banana-compiler")},
+            python={"banana-compiler": PythonData(package_name="banana-compiler")},
+        )
+        with patch("ecosystem.python.request_json", side_effect=self.fake_request()):
+            member.update_python()
+        self.assertEqual("0.3.1", member.python["banana-compiler"].version)
+
+    def test_section_is_rekeyed_when_the_distribution_is_renamed(self):
+        """The key follows the name the repository declares now."""
+        member = self.member(python={"old-name": PythonData(package_name="old-name")})
+        with patch("ecosystem.python.request_json", side_effect=self.fake_request()):
+            member.update_python()
+        self.assertEqual(["banana-compiler"], list(member.python))
+
+    def test_section_is_dropped_when_nothing_declares_a_distribution(self):
+        """A repository that stopped being a Python package loses its section."""
+        member = self.member(python={"banana-compiler": PythonData(package_name="b")})
+        with patch("ecosystem.python.request_json", return_value=listing("README.md")):
+            member.update_python()
+        self.assertEqual({}, member.python)
+
+    def test_a_member_without_a_github_section_is_skipped(self):
+        """There is nothing to fetch from, so nothing is attempted."""
+        member = Member(
+            name="Banana Compiler",
+            url=f"https://github.com/{OWNER}/{REPO}",
+            uuid="banana-uuid-0000-0000-000000000000",
+            maturity="experimental",
+        )
+        with patch("ecosystem.python.request_json") as request:
+            member.update_python()
+        self.assertEqual({}, member.python)
+        request.assert_not_called()
+
+    def test_the_declared_path_is_kept_across_updates(self):
+        """`path` cannot be discovered, so a refresh must not lose it."""
+        member = self.member(
+            python={"banana-compiler": PythonData(path="packages/compiler")}
+        )
+        requested = []
+
+        def request(url, **kwargs):
+            requested.append(str(url))
+            return self.fake_request()(url, **kwargs)
+
+        with patch("ecosystem.python.request_json", side_effect=request):
+            member.update_python()
+        self.assertTrue(requested[0].endswith("/contents/packages/compiler/"))
+        self.assertEqual("packages/compiler", member.python["banana-compiler"].path)
+
+    def test_the_section_round_trips_through_from_dict(self):
+        """A member read back from a toml file keeps its python section."""
+        member = self.member()
+        with patch("ecosystem.python.request_json", side_effect=self.fake_request()):
+            member.update_python()
+        restored = Member.from_dict(member.to_dict())
+        self.assertEqual(
+            member.python["banana-compiler"].to_dict(),
+            restored.python["banana-compiler"].to_dict(),
+        )
