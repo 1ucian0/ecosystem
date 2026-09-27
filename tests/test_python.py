@@ -1,0 +1,402 @@
+"""Tests for ecosystem/python.py."""
+
+from datetime import date
+from unittest import TestCase
+from unittest.mock import patch
+
+from ecosystem.error_handling import EcosystemError
+from ecosystem.python import PythonData, parse_setup_cfg, parse_setup_py
+
+OWNER = "banana-org"
+REPO = "banana-compiler"
+CONTENTS = f"api.github.com/repos/{OWNER}/{REPO}/contents/"
+
+PYPROJECT = """
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "Banana_Compiler"
+version = "0.3.1"
+description = "Compiles bananas"
+requires-python = ">=3.9"
+license = "Apache-2.0"
+dependencies = ["qiskit>=1.2,<3", "numpy"]
+"""
+
+SETUP_CFG = """
+[metadata]
+name = banana-compiler
+version = 0.0.9
+description = Compiles bananas, slowly
+classifiers =
+    License :: OSI Approved :: MIT License
+    Programming Language :: Python :: 3
+
+[options]
+python_requires = >=3.7
+install_requires =
+    qiskit-terra>=0.19
+    qiskit>=0.45
+"""
+
+SETUP_PY = """
+from setuptools import setup, find_packages
+
+VERSION = read_version_from_somewhere()
+
+setup(
+    name="banana-compiler",
+    version=VERSION,
+    license="Apache 2.0",
+    install_requires=["qiskit>=1.0"],
+    packages=find_packages(),
+)
+"""
+
+# Qiskit releases, so that the compat fields do not need the network
+QISKIT_VERSIONS = {
+    "1.0.0": {"upload_at": date(2024, 2, 1)},
+    "2.0.0": {"upload_at": date(2025, 4, 1)},
+}
+
+
+def listing(*names):
+    """A contents-API directory listing holding `names` as files."""
+    return {"entries": [{"name": name, "type": "file"} for name in names]}
+
+
+class PythonDataTestCase(TestCase):
+    """Base with the Qiskit release table stubbed out."""
+
+    def setUp(self):
+        super().setUp()
+        patcher = patch.object(
+            PythonData, "all_qiskit_versions", return_value=QISKIT_VERSIONS
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    @staticmethod
+    def fetched(**manifests):
+        """A PythonData as if `update_json` had found `manifests`."""
+        data = PythonData(owner=OWNER, repo=REPO)
+        data._pyproject = manifests.get("pyproject")  # pylint: disable=protected-access
+        data._setup_cfg = manifests.get("setup_cfg")  # pylint: disable=protected-access
+        data._setup_py = manifests.get("setup_py")  # pylint: disable=protected-access
+        return data
+
+
+class TestParseSetupPy(TestCase):
+    """setup.py is read statically, never executed."""
+
+    def test_literal_and_deferred_kwargs_are_separated(self):
+        """Literal arguments are read; computed ones are only named."""
+        parsed = parse_setup_py(SETUP_PY)
+        self.assertEqual("banana-compiler", parsed["literals"]["name"])
+        self.assertEqual(["qiskit>=1.0"], parsed["literals"]["install_requires"])
+        self.assertEqual(["version", "packages"], parsed["deferred"])
+
+    def test_setup_is_not_executed(self):
+        """A setup.py with side effects is parsed without running them."""
+        parsed = parse_setup_py(
+            "raise SystemExit('boom')\nsetup(name='banana-compiler')\n"
+        )
+        self.assertEqual("banana-compiler", parsed["literals"]["name"])
+
+    def test_namespaced_setup_call_is_found(self):
+        """`setuptools.setup(...)` is recognized as well as a bare `setup(...)`."""
+        parsed = parse_setup_py("import setuptools\nsetuptools.setup(name='banana')\n")
+        self.assertEqual("banana", parsed["literals"]["name"])
+
+    def test_unparseable_file_warns_and_yields_nothing(self):
+        """A setup.py that does not compile is reported, not raised on."""
+        with self.assertLogs("ecosystem", level="WARNING"):
+            parsed = parse_setup_py("def (:\n")
+        self.assertEqual({"literals": {}, "deferred": []}, parsed)
+
+    def test_no_setup_call(self):
+        """A module without a setup() call yields nothing."""
+        self.assertEqual({"literals": {}, "deferred": []}, parse_setup_py("x = 1\n"))
+
+
+class TestParseSetupCfg(TestCase):
+    """setup.cfg is INI, so its lists are indented strings."""
+
+    def test_sections_become_dicts(self):
+        """[metadata] and [options] are both available."""
+        parsed = parse_setup_cfg(SETUP_CFG)
+        self.assertEqual("banana-compiler", parsed["metadata"]["name"])
+        self.assertEqual(">=3.7", parsed["options"]["python_requires"])
+
+    def test_unparseable_file_warns_and_yields_nothing(self):
+        """A setup.cfg that is not INI is reported, not raised on."""
+        with self.assertLogs("ecosystem", level="WARNING"):
+            self.assertEqual({}, parse_setup_cfg("[unclosed\n"))
+
+
+class TestPythonDataFields(PythonDataTestCase):
+    """Field reading over the three manifests."""
+
+    def test_pep_621_pyproject(self):
+        """A modern pyproject.toml provides every field on its own."""
+        import tomllib  # pylint: disable=import-outside-toplevel
+
+        data = self.fetched(pyproject=tomllib.loads(PYPROJECT))
+        self.assertEqual(
+            {
+                "package_name": "banana-compiler",
+                "version": "0.3.1",
+                "license": "Apache-2.0",
+                "description": "Compiles bananas",
+                "requires_python": ">=3.9",
+                "requires_qiskit": "<3,>=1.2",
+                "compatible_with_qiskit_v1": True,
+                "compatible_with_qiskit_v2": True,
+                "highest_supported_qiskit_release_date": date(2025, 4, 1),
+                "highest_supported_qiskit_version": "2.0.0",
+                "build_backend": "setuptools.build_meta",
+                "source": ["pyproject.toml"],
+                "deferred": [],
+            },
+            data.to_dict(),
+        )
+
+    def test_package_name_is_canonicalized(self):
+        """`Banana_Compiler` is the same distribution as `banana-compiler`."""
+        import tomllib  # pylint: disable=import-outside-toplevel
+
+        data = self.fetched(pyproject=tomllib.loads(PYPROJECT))
+        self.assertEqual("banana-compiler", data.package_name)
+
+    def test_setup_cfg_lists_are_split(self):
+        """Indented multi-line INI values are read as lists."""
+        data = self.fetched(setup_cfg=parse_setup_cfg(SETUP_CFG))
+        self.assertEqual(["qiskit-terra>=0.19", "qiskit>=0.45"], data.dependencies)
+        self.assertEqual(">=0.45", data.requires_qiskit)
+        self.assertEqual(">=3.7", data.requires_python)
+
+    def test_setup_py_only(self):
+        """A legacy project still yields a name, license and requires_qiskit."""
+        data = self.fetched(setup_py=parse_setup_py(SETUP_PY))
+        self.assertEqual("banana-compiler", data.package_name)
+        self.assertEqual("Apache-2.0", str(data.license))
+        self.assertEqual(">=1.0", data.requires_qiskit)
+        self.assertEqual(["packages", "version"], data.deferred)
+
+    def test_pyproject_wins_over_the_older_manifests(self):
+        """Precedence is pyproject.toml, then setup.cfg, then setup.py."""
+        import tomllib  # pylint: disable=import-outside-toplevel
+
+        data = self.fetched(
+            pyproject=tomllib.loads(PYPROJECT),
+            setup_cfg=parse_setup_cfg(SETUP_CFG),
+            setup_py=parse_setup_py(SETUP_PY),
+        )
+        self.assertEqual("0.3.1", data.version)
+        self.assertEqual("Apache-2.0", str(data.license))
+        self.assertEqual(["pyproject.toml", "setup.cfg", "setup.py"], data.source)
+
+    def test_setup_cfg_wins_over_setup_py(self):
+        """Without a pyproject.toml, setup.cfg is the authority."""
+        data = self.fetched(
+            setup_cfg=parse_setup_cfg(SETUP_CFG), setup_py=parse_setup_py(SETUP_PY)
+        )
+        self.assertEqual("0.0.9", data.version)
+        self.assertEqual("Compiles bananas, slowly", data.description)
+
+    def test_no_manifest_is_not_an_error(self):
+        """A repository with no packaging metadata reports nothing declared."""
+        data = self.fetched()
+        self.assertFalse(data.fetched)
+        self.assertIsNone(data.package_name)
+        self.assertIsNone(data.requires_qiskit)
+        self.assertEqual({"source": [], "deferred": []}, data.to_dict())
+
+
+class TestPythonDataLicense(PythonDataTestCase):
+    """`[project].license` has more than one shape, and P12 reads this field."""
+
+    def test_spdx_string(self):
+        """PEP 639 gives the license as an SPDX expression."""
+        data = self.fetched(pyproject={"project": {"license": "MIT"}})
+        self.assertEqual("MIT", str(data.license))
+
+    def test_license_table_with_text(self):
+        """The pre-PEP-639 table carries the name under `text`."""
+        data = self.fetched(
+            pyproject={"project": {"license": {"text": "BSD-3-Clause"}}}
+        )
+        self.assertEqual("BSD-3-Clause", str(data.license))
+
+    def test_license_table_with_file_is_not_a_license_name(self):
+        """`{file = "LICENSE.txt"}` names a file, so it declares no license name."""
+        data = self.fetched(pyproject={"project": {"license": {"file": "LICENSE.txt"}}})
+        self.assertIsNone(data.license)
+
+    def test_falls_back_to_the_trove_classifier(self):
+        """With no `license` key, the classifier is read the way PyPI's is."""
+        data = self.fetched(setup_cfg=parse_setup_cfg(SETUP_CFG))
+        self.assertEqual("MIT", str(data.license))
+
+
+class TestPythonDataDeferred(PythonDataTestCase):
+    """What the build backend computes cannot be read from the manifests."""
+
+    def test_dynamic_version_is_not_reported_as_a_version(self):
+        """`dynamic = ["version"]` means the manifest does not state a version."""
+        data = self.fetched(
+            pyproject={"project": {"name": "banana", "dynamic": ["version"]}}
+        )
+        self.assertIsNone(data.version)
+        self.assertEqual(["version"], data.deferred)
+
+    def test_dynamic_dependencies_separates_from_no_qiskit(self):
+        """A deferred dependency list is not the same as not needing Qiskit."""
+        deferred = self.fetched(
+            pyproject={"project": {"name": "banana", "dynamic": ["dependencies"]}}
+        )
+        declared = self.fetched(
+            pyproject={"project": {"name": "banana", "dependencies": ["numpy"]}}
+        )
+        self.assertIsNone(deferred.requires_qiskit)
+        self.assertIsNone(declared.requires_qiskit)
+        self.assertEqual(["dependencies"], deferred.deferred)
+        self.assertEqual([], declared.deferred)
+
+    def test_dynamic_and_setup_py_deferred_are_merged(self):
+        """Both manifests can defer, and the union is reported once, sorted."""
+        data = self.fetched(
+            pyproject={"project": {"name": "banana", "dynamic": ["version"]}},
+            setup_py=parse_setup_py(SETUP_PY),
+        )
+        self.assertEqual(["packages", "version"], data.deferred)
+
+
+class TestPythonDataRequiresQiskit(PythonDataTestCase):
+    """`requires_qiskit` drives every compat field."""
+
+    def test_qiskit_terra_is_not_qiskit(self):
+        """Only a requirement named `qiskit` counts."""
+        data = self.fetched(
+            pyproject={"project": {"dependencies": ["qiskit-terra>=0.19"]}}
+        )
+        self.assertIsNone(data.requires_qiskit)
+
+    def test_unpinned_qiskit_is_forced_to_any_version(self):
+        """A bare `qiskit` dependency is warned about and read as `>=0`."""
+        data = self.fetched(pyproject={"project": {"dependencies": ["qiskit"]}})
+        with self.assertLogs("ecosystem", level="WARNING"):
+            self.assertEqual(">=0", data.requires_qiskit)
+
+    def test_specifier_is_computed_once(self):
+        """Repeated reads do not re-warn: the compat fields all go through here."""
+        data = self.fetched(pyproject={"project": {"dependencies": ["qiskit"]}})
+        with self.assertLogs("ecosystem", level="WARNING") as logs:
+            data.to_dict()
+        self.assertEqual(1, len(logs.records))
+
+    def test_unparseable_requirement_is_skipped(self):
+        """A broken requirement string is reported and does not stop the scan."""
+        data = self.fetched(
+            pyproject={"project": {"dependencies": ["not a requirement!", "qiskit>=2"]}}
+        )
+        with self.assertLogs("ecosystem", level="WARNING"):
+            self.assertEqual(">=2", data.requires_qiskit)
+
+    def test_compat_flags_follow_the_specifier(self):
+        """A Qiskit 2-only project is not compatible with the v1 series."""
+        data = self.fetched(pyproject={"project": {"dependencies": ["qiskit>=2.0"]}})
+        self.assertFalse(data.compatible_with_qiskit_v1)
+        self.assertTrue(data.compatible_with_qiskit_v2)
+        self.assertEqual("2.0.0", data.highest_supported_qiskit_version)
+
+
+class TestPythonDataRoundTrip(PythonDataTestCase):
+    """A stored section has to work with no network."""
+
+    def test_stored_values_are_returned_unfetched(self):
+        """Every serialized field survives `from_dict` without a fetch."""
+        stored = {
+            "package_name": "banana-compiler",
+            "version": "0.3.1",
+            "license": "Apache-2.0",
+            "description": "Compiles bananas",
+            "requires_python": ">=3.9",
+            "requires_qiskit": ">=1.2",
+            "build_backend": "setuptools.build_meta",
+            "path": "packages/compiler",
+            "source": ["pyproject.toml"],
+            "deferred": ["version"],
+        }
+        data = PythonData.from_dict(dict(stored))
+        self.assertEqual(
+            stored
+            | {
+                "compatible_with_qiskit_v1": True,
+                "compatible_with_qiskit_v2": True,
+                "highest_supported_qiskit_release_date": date(2025, 4, 1),
+                "highest_supported_qiskit_version": "2.0.0",
+            },
+            data.to_dict(),
+        )
+
+
+class TestPythonDataFetching(PythonDataTestCase):
+    """`update_json` lists the directory, then reads what is there."""
+
+    def test_only_present_manifests_are_requested(self):
+        """A repository with one manifest costs one listing and one read."""
+        requested = []
+
+        def fake_request(url, **kwargs):
+            requested.append(str(url))
+            if str(url).endswith("/contents/"):
+                return listing("pyproject.toml", "README.md")
+            return kwargs["parser"](PYPROJECT)
+
+        with patch("ecosystem.python.request_json", side_effect=fake_request):
+            data = PythonData(owner=OWNER, repo=REPO)
+            data.update_json()
+
+        self.assertEqual(2, len(requested))
+        self.assertTrue(requested[1].endswith("/pyproject.toml"))
+        self.assertEqual("0.3.1", data.version)
+        self.assertEqual(["pyproject.toml"], data.source)
+
+    def test_directories_are_not_manifests(self):
+        """A directory named `setup.py` would not be a manifest."""
+        with patch(
+            "ecosystem.python.request_json",
+            return_value={"entries": [{"name": "setup.py", "type": "dir"}]},
+        ):
+            data = PythonData(owner=OWNER, repo=REPO)
+            data.update_json()
+        self.assertFalse(data.fetched)
+
+    def test_path_is_used_for_a_monorepo(self):
+        """Manifests are read from `path` when they are not at the root."""
+        requested = []
+
+        def fake_request(url, **kwargs):  # pylint: disable=unused-argument
+            requested.append(str(url))
+            return listing()
+
+        with patch("ecosystem.python.request_json", side_effect=fake_request):
+            PythonData(owner=OWNER, repo=REPO, path="packages/compiler").update_json()
+
+        self.assertTrue(requested[0].endswith("/contents/packages/compiler/"))
+
+    def test_fetching_needs_owner_and_repo(self):
+        """A section built from stored values alone cannot be refreshed."""
+        with self.assertRaises(EcosystemError):
+            PythonData(package_name="banana-compiler").update_json()
+
+    def test_from_github_takes_owner_and_repo_from_the_member(self):
+        """The GitHub section is where owner and repo come from."""
+        github = type("FakeGitHub", (), {"owner": OWNER, "repo": REPO})()
+        data = PythonData.from_github(github, path="packages/compiler")
+        self.assertEqual(OWNER, data.owner)
+        self.assertEqual(REPO, data.repo)
+        self.assertEqual("packages/compiler", data.path)
