@@ -136,9 +136,7 @@ class TestPipSourcePackageCard(PipSourceTestCase):
         self.assertEqual(6, len(bullets))
         for index in bullets:
             with self.subTest(bullet=declared[index]):
-                # an annotated bullet carries its `{ .annotate }` marker first
-                following = declared[index + 1]
-                self.assertIn(following, ("", "{ .annotate }"))
+                self.assertEqual("", declared[index + 1])
 
 
 class TestPipSourcePage(PipSourceTestCase):

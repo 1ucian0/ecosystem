@@ -636,9 +636,6 @@ class PipSourcePackageCard(Card):
                 ":material-help-circle-outline:",
                 "**computed at build time** "
                 + ", ".join(f"`{field}`" for field in self.deferred),
-                annotation="These fields are not declared statically, so reading the "
-                "manifests cannot tell what they are. Finding out means building the "
-                "distribution, which this project does not do.",
             ) + [""]
         ret += qiskit_compatibility(self)
         return ret
