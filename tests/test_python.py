@@ -9,6 +9,7 @@ from ecosystem.github import GitHubData
 from ecosystem.member import Member
 from ecosystem.pypi import PyPIData
 from ecosystem.python import PythonData, parse_setup_cfg, parse_setup_py
+from ecosystem.request import URL
 
 OWNER = "banana-org"
 REPO = "banana-compiler"
@@ -510,3 +511,99 @@ class TestMemberUpdatePython(PythonDataTestCase):
             member.python["banana-compiler"].to_dict(),
             restored.python["banana-compiler"].to_dict(),
         )
+
+
+class TestPythonDataFromUrl(PythonDataTestCase):
+    """A manifest URL is how a distribution that is on no registry is submitted."""
+
+    @staticmethod
+    def from_url(url):
+        """The section a submitted URL creates, if any."""
+        return PythonData.from_url(URL(url))
+
+    def test_a_manifest_at_the_repository_root(self):
+        """The common case: one distribution, declared at the top of the repository."""
+        data = self.from_url(f"https://github.com/{OWNER}/{REPO}/blob/main/setup.cfg")
+        self.assertEqual((OWNER, REPO), (data.owner, data.repo))
+        self.assertIsNone(data.path)
+
+    def test_a_manifest_in_a_subdirectory_declares_the_path(self):
+        """`path` cannot be discovered, so the URL is the only way to state it."""
+        data = self.from_url(
+            f"https://github.com/{OWNER}/{REPO}/blob/main/packages/compiler/pyproject.toml"
+        )
+        self.assertEqual("packages/compiler", data.path)
+
+    def test_the_branch_is_dropped(self):
+        """Manifests are always read from the default branch."""
+        data = self.from_url(
+            f"https://github.com/{OWNER}/{REPO}/blob/v0.3.1/pyproject.toml"
+        )
+        self.assertEqual((OWNER, REPO, None), (data.owner, data.repo, data.path))
+
+    def test_other_urls_are_not_claimed(self):
+        """A repository or release link is left in `packages` for something else."""
+        for url in (
+            f"https://github.com/{OWNER}/{REPO}",
+            f"https://github.com/{OWNER}/{REPO}/releases/tag/v0.3.1",
+            "https://pypi.org/project/banana-compiler/",
+        ):
+            with self.subTest(url=url):
+                self.assertIsNone(self.from_url(url))
+
+    def test_a_github_blob_that_is_not_a_manifest_is_an_error(self):
+        """The URL was meant as a manifest, so pointing at the wrong file is a typo."""
+        with self.assertRaises(EcosystemError):
+            self.from_url(f"https://github.com/{OWNER}/{REPO}/blob/main/README.md")
+
+    def test_the_key_stands_in_until_the_name_is_known(self):
+        """The distribution name is inside the repository, not in the URL."""
+        data = self.from_url(
+            f"https://github.com/{OWNER}/Banana_Compiler/blob/main/pyproject.toml"
+        )
+        self.assertEqual("banana-compiler", data.key)
+
+
+class TestUpsertSectionsPython(PythonDataTestCase):
+    """`upsert_sections` turns a submitted manifest URL into a `[python.*]` section."""
+
+    @staticmethod
+    def member(packages):
+        """A submitted member, with no sections yet beyond its package URLs."""
+        return Member(
+            name="Banana Compiler",
+            url=f"https://github.com/{OWNER}/{REPO}",
+            uuid="banana-uuid-0000-0000-000000000000",
+            maturity="experimental",
+            packages=[URL(package) for package in packages],
+        )
+
+    def test_a_manifest_url_creates_the_section(self):
+        """No fetching: the section is created empty and an updater fills it in."""
+        member = self.member(
+            [f"https://github.com/{OWNER}/{REPO}/blob/main/chemistry/pyproject.toml"]
+        )
+        member.upsert_sections()
+        self.assertEqual([REPO], list(member.python))
+        self.assertEqual("chemistry", member.python[REPO].path)
+        self.assertEqual([], member.packages)
+
+    def test_the_section_is_rekeyed_by_the_first_update(self):
+        """The repository name only stands in until a manifest states the real one."""
+        member = self.member(
+            [f"https://github.com/{OWNER}/{REPO}/blob/main/pyproject.toml"]
+        )
+        member.upsert_sections()
+        with patch(
+            "ecosystem.python.request_json",
+            side_effect=TestMemberUpdatePython.fake_request(),
+        ):
+            member.update_python()
+        self.assertEqual(["banana-compiler"], list(member.python))
+
+    def test_a_registry_url_still_wins(self):
+        """A published distribution is described by its registry section."""
+        member = self.member(["https://pypi.org/project/banana-compiler/"])
+        member.upsert_sections()
+        self.assertEqual({}, member.python)
+        self.assertEqual(["banana-compiler"], list(member.pypi))

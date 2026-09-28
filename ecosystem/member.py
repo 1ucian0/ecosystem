@@ -294,6 +294,7 @@ class Member(JsonSerializable):  # pylint: disable=too-many-instance-attributes
          * github
          * pypi
          * julia
+         * python
          * badge
         """
 
@@ -315,6 +316,10 @@ class Member(JsonSerializable):  # pylint: disable=too-many-instance-attributes
                 self.pypi[pypi.package_name] = pypi
             elif julia := JuliaData.from_url(package):
                 self.julia[julia.package_name] = julia
+            elif python := PythonData.from_url(package):
+                # keyed by the repository name for now; `update_python` re-keys the
+                # section once it reads the distribution name out of the manifest
+                self.python[python.key] = python
             else:
                 keep_in_packages.append(package)
 

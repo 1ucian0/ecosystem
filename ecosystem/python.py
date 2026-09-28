@@ -99,9 +99,14 @@ def parse_setup_py(text: str) -> dict:
     return result
 
 
-class PythonData(QiskitRequirementMixin, JsonSerializable):
+class PythonData(
+    QiskitRequirementMixin, JsonSerializable
+):  # pylint: disable=too-many-public-methods
     """
     The packaging metadata a Python project declares in its own source tree.
+
+    Most of the public surface is one small read-only property per metadata field,
+    which is what takes it past the method limit.
     """
 
     dict_keys = [
@@ -160,6 +165,47 @@ class PythonData(QiskitRequirementMixin, JsonSerializable):
     def from_github(cls, github_data, path: str = None):
         """Builds an (unfetched) section from a member's `[github]` section."""
         return cls(owner=github_data.owner, repo=github_data.repo, path=path)
+
+    @classmethod
+    def from_url(cls, manifest_url):
+        """Builds an (unfetched) section from the URL of a packaging manifest, like
+        - https://github.com/<owner>/<repo>/blob/<ref>/pyproject.toml
+        - https://github.com/<owner>/<repo>/blob/<ref>/<path>/setup.cfg
+
+        This is how a distribution that is not on a registry gets submitted: the URL
+        says which repository, and which directory in it, holds the manifests. It is
+        the only way to declare `path`, which cannot be discovered.
+
+        Returns None for any other URL, GitHub ones included, so that a link to a
+        repository or a release stays in `packages` for something else to claim. The
+        `<ref>` is dropped: manifests are read from the default branch.
+        """
+        if "github.com" not in (manifest_url.hostname or ""):
+            return None
+
+        parts = [part for part in manifest_url.path.split("/") if part]
+        if len(parts) < 5 or parts[2] != "blob":
+            return None
+
+        if parts[-1] not in MANIFESTS:
+            raise EcosystemError(
+                f"{manifest_url} does not point at one of " f"{', '.join(MANIFESTS)}"
+            )
+
+        return cls(owner=parts[0], repo=parts[1], path="/".join(parts[4:-1]) or None)
+
+    @property
+    def key(self):
+        """The `[python.<key>]` key this section belongs under.
+
+        The distribution name, once it is known. A section built from a URL does not
+        know it yet: it is declared inside the repository, not in the URL. The
+        repository name stands in until `update_json` reads a manifest, and
+        `Member.update_python` re-keys the section then.
+        """
+        if self.package_name:
+            return self.package_name
+        return canonicalize_name(self.repo) if self.repo else None
 
     # ---------------------------------------------------------------- fetching
 
