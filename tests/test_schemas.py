@@ -41,3 +41,28 @@ class MembersSchemaTestCase(TestCase):
             self.schema["properties"]["status"]["enum"],
             self.classifications.status_names,
         )
+
+    def test_no_items_uses_the_draft_4_array_form(self):
+        """`items` has to be a schema, not a list of schemas.
+
+        The draft-4 array form (`"items": [{...}]`) means `prefixItems` in draft
+        2020-12, which the file declares. `jsonschema` rejects the whole schema over
+        it, so nothing gets validated at all, while `taplo check` -- what CI runs --
+        quietly drops the constraint instead and passes anything.
+        """
+
+        def walk(node, path="$"):
+            if isinstance(node, dict):
+                for key, value in node.items():
+                    if key == "items":
+                        self.assertIsInstance(
+                            value,
+                            dict,
+                            f"{path}.items is a list; use prefixItems or a single schema",
+                        )
+                    walk(value, f"{path}.{key}")
+            elif isinstance(node, list):
+                for index, value in enumerate(node):
+                    walk(value, f"{path}[{index}]")
+
+        walk(self.schema)
