@@ -35,8 +35,8 @@ importance = "CRITICAL"
 title = "Be compatible with the Qiskit SDK v2 or newer"
 applies_to = "all"
 category = "GENERAL"
-related_to = ["PQ2"]
-description = "If the software depends on Qiskit SDK in some way, there should exist a supported release that is compatible with the Qiskit SDK v2.0 or newer. This applies to Python packages and to other forms of dependencies."
+related_to = ["PQ2", "S01"]
+description = "If the software depends on Qiskit SDK in some way, there should exist a supported release that is compatible with the Qiskit SDK v2.0 or newer. This applies to Python packages and to other forms of dependencies. A project that publishes no release answers this with the distribution its repository declares, which is [S01]."
 importance = "CRITICAL"
 checker = "test_general.py::test_Q20"
 
